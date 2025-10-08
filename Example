@@ -1,4 +1,4 @@
-loadstring(game:HttpGet("https://raw.githubusercontent.com/sigmaboi4167-code/Linoria-Gui-Execly.gay-Gui/refs/heads/main/LinoriaLib-Modded", true))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/sigmaboi4167-code/Linoria-Gui-Execly.gay-Gui/refs/heads/main/Linorialib", true))()
 
 local Window = Library:CreateWindow({
     Title = 'Example menu',
