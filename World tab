@@ -1,0 +1,153 @@
+LeftGroupbox = Tabs.World:AddLeftGroupbox('World Visuals')
+LeftGroupbox:AddLabel('Configure world visuals below!')
+LeftGroupbox:AddDivider()
+
+-- Ambient Lighting Toggle and Slider
+LeftGroupbox:AddToggle('AmbientLightingToggle', { Text = 'Ambient Lighting', Default = false, Tooltip = 'Enable to adjust ambient lighting' })
+local AmbientDepbox = LeftGroupbox:AddDependencyBox()
+AmbientDepbox:AddSlider('AmbientLightingSlider', { Text = 'Ambient Lighting Intensity', Default = 1, Min = 0, Max = 2, Rounding = 2, Tooltip = 'Adjusts the world’s ambient lighting intensity' })
+AmbientDepbox:SetupDependencies({ { Toggles.AmbientLightingToggle, true } })
+
+Toggles.AmbientLightingToggle:OnChanged(function()
+    print('AmbientLightingToggle changed to:', Toggles.AmbientLightingToggle.Value)
+end)
+Toggles.AmbientLightingToggle:SetValue(false)
+
+Options.AmbientLightingSlider:OnChanged(function()
+    print('AmbientLightingSlider changed to:', Options.AmbientLightingSlider.Value)
+end)
+Options.AmbientLightingSlider:SetValue(1)
+
+-- Skyboxes Toggle and Dropdown
+LeftGroupbox:AddToggle('SkyboxesToggle', { Text = 'Skyboxes', Default = false, Tooltip = 'Enable to customize skybox visuals' })
+local SkyboxesDepbox = LeftGroupbox:AddDependencyBox()
+SkyboxesDepbox:AddDropdown('SkyboxesDropdown', { Text = 'Skybox Preset', Default = 1, Values = {'Default', 'Night', 'Sunset', 'Psychedelic'}, Tooltip = 'Select a skybox preset' })
+SkyboxesDepbox:SetupDependencies({ { Toggles.SkyboxesToggle, true } })
+
+Toggles.SkyboxesToggle:OnChanged(function()
+    print('SkyboxesToggle changed to:', Toggles.SkyboxesToggle.Value)
+end)
+Toggles.SkyboxesToggle:SetValue(false)
+
+Options.SkyboxesDropdown:OnChanged(function()
+    print('SkyboxesDropdown changed to:', Options.SkyboxesDropdown.Value)
+end)
+Options.SkyboxesDropdown:SetValue('Default')
+
+-- Watermark Toggle and Color Picker
+LeftGroupbox:AddToggle('WatermarkToggle', { Text = 'Watermark', Default = false, Tooltip = 'Enable to show watermark' })
+local WatermarkDepbox = LeftGroupbox:AddDependencyBox()
+WatermarkDepbox:AddLabel('Watermark Color'):AddColorPicker('WatermarkColorPicker', {
+    Default = Color3.new(1, 1, 1),
+    Title = 'Watermark Color',
+    Transparency = 0,
+    Tooltip = 'Set watermark color',
+    Callback = function(Value)
+        print('[cb] WatermarkColor changed!', Value)
+    end
+})
+WatermarkDepbox:SetupDependencies({ { Toggles.WatermarkToggle, true } })
+
+Toggles.WatermarkToggle:OnChanged(function()
+    print('WatermarkToggle changed to:', Toggles.WatermarkToggle.Value)
+end)
+Toggles.WatermarkToggle:SetValue(false)
+
+Options.WatermarkColorPicker:OnChanged(function()
+    print('WatermarkColor changed!', Options.WatermarkColorPicker.Value)
+end)
+Options.WatermarkColorPicker:SetValueRGB(Color3.fromRGB(255, 255, 255))
+
+-- FPS Counter Toggle
+LeftGroupbox:AddToggle('FPSCounter', { Text = 'FPS Counter', Default = false, Tooltip = 'Displays FPS and performance metrics' })
+Toggles.FPSCounter:OnChanged(function()
+    print('FPSCounter changed to:', Toggles.FPSCounter.Value)
+end)
+Toggles.FPSCounter:SetValue(false)
+
+-- Freecam Toggle and Keybind
+LeftGroupbox:AddToggle('FreecamToggle', { Text = 'Freecam', Default = false, Tooltip = 'Enable to allow free camera movement' })
+local FreecamDepbox = LeftGroupbox:AddDependencyBox()
+FreecamDepbox:AddLabel('Freecam Key'):AddKeyPicker('FreecamKeyPicker', {
+    Default = 'F',
+    SyncToggleState = false,
+    Mode = 'Toggle',
+    Text = 'Freecam activation key',
+    NoUI = false,
+    Tooltip = 'Set key to activate freecam',
+    Callback = function(Value)
+        print('[cb] FreecamKey clicked!', Value)
+    end
+})
+FreecamDepbox:SetupDependencies({ { Toggles.FreecamToggle, true } })
+
+Toggles.FreecamToggle:OnChanged(function()
+    print('FreecamToggle changed to:', Toggles.FreecamToggle.Value)
+end)
+Toggles.FreecamToggle:SetValue(false)
+
+Options.FreecamKeyPicker:OnChanged(function()
+    print('FreecamKey changed!', Options.FreecamKeyPicker.Value)
+end)
+Options.FreecamKeyPicker:SetValue({ 'F', 'Toggle' })
+
+-- X-Ray Toggle
+LeftGroupbox:AddToggle('XRay', { Text = 'X-Ray', Default = false, Tooltip = 'Enables see-through walls for objects' })
+Toggles.XRay:OnChanged(function()
+    print('XRay changed to:', Toggles.XRay.Value)
+end)
+Toggles.XRay:SetValue(false)
+
+-- Right Tabbox for Camera Controls
+local CameraTabbox = Tabs.World:AddRightTabbox()
+local CameraControlsTab = CameraTabbox:AddTab('Camera Controls')
+CameraControlsTab:AddLabel('Adjust camera settings below!')
+CameraControlsTab:AddDivider()
+
+-- FOV Camera Toggle and Slider
+CameraControlsTab:AddToggle('FOVCameraToggle', { Text = 'FOV Camera', Default = false, Tooltip = 'Enable to adjust field of view' })
+local FOVDepbox = CameraControlsTab:AddDependencyBox()
+FOVDepbox:AddSlider('FOVCameraSlider', { Text = 'FOV Camera Slider', Default = 60, Min = 30, Max = 120, Rounding = 0, Tooltip = 'Adjusts the field of view angle' })
+FOVDepbox:SetupDependencies({ { Toggles.FOVCameraToggle, true } })
+
+Toggles.FOVCameraToggle:OnChanged(function()
+    print('FOVCameraToggle changed to:', Toggles.FOVCameraToggle.Value)
+end)
+Toggles.FOVCameraToggle:SetValue(false)
+
+Options.FOVCameraSlider:OnChanged(function()
+    print('FOVCameraSlider changed to:', Options.FOVCameraSlider.Value)
+end)
+Options.FOVCameraSlider:SetValue(60)
+
+-- Zoom Ability Toggle and Slider
+CameraControlsTab:AddToggle('ZoomAbilityToggle', { Text = 'Zoom Ability', Default = false, Tooltip = 'Enable to adjust zoom level' })
+local ZoomDepbox = CameraControlsTab:AddDependencyBox()
+ZoomDepbox:AddSlider('ZoomAbilitySlider', { Text = 'Zoom Ability Slider', Default = 1, Min = 0.5, Max = 5, Rounding = 1, Tooltip = 'Adjusts zoom level' })
+ZoomDepbox:AddLabel('Zoom Key'):AddKeyPicker('ZoomKeyPicker', {
+    Default = 'Z',
+    SyncToggleState = false,
+    Mode = 'Toggle',
+    Text = 'Zoom activation key',
+    NoUI = false,
+    Tooltip = 'Set key to activate zoom',
+    Callback = function(Value)
+        print('[cb] ZoomKey clicked!', Value)
+    end
+})
+ZoomDepbox:SetupDependencies({ { Toggles.ZoomAbilityToggle, true } })
+
+Toggles.ZoomAbilityToggle:OnChanged(function()
+    print('ZoomAbilityToggle changed to:', Toggles.ZoomAbilityToggle.Value)
+end)
+Toggles.ZoomAbilityToggle:SetValue(false)
+
+Options.ZoomAbilitySlider:OnChanged(function()
+    print('ZoomAbilitySlider changed to:', Options.ZoomAbilitySlider.Value)
+end)
+Options.ZoomAbilitySlider:SetValue(1)
+
+Options.ZoomKeyPicker:OnChanged(function()
+    print('ZoomKey changed!', Options.ZoomKeyPicker.Value)
+end)
+Options.ZoomKeyPicker:SetValue({ 'Z', 'Toggle' })
