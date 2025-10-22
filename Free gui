@@ -1,0 +1,289 @@
+-- Official Linoria libraries
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/sigmaboi4167-code/Linoria-Gui-Execly.gay-Gui/refs/heads/main/Linorialib", true))()
+local ThemeManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/violin-suzutsuki/LinoriaLib/main/addons/ThemeManager.lua"))()
+local SaveManager  = loadstring(game:HttpGet("https://raw.githubusercontent.com/violin-suzutsuki/LinoriaLib/main/addons/SaveManager.lua"))()
+
+local Window = Library:CreateWindow({
+    Title = 'Execly.gay',
+    Center = true,
+    AutoShow = true,
+    TabPadding = 8,
+    MenuFadeTime = 0.2
+})
+
+local Tabs = {
+    Combat = Window:AddTab('Combat'),
+    Visuals = Window:AddTab('Visuals'),
+    World = Window:AddTab('World'),
+    ['UI Settings'] = Window:AddTab('UI Settings'),
+}
+
+-- Aimbot
+local AimbotGroupBox = Tabs.Combat:AddLeftGroupbox('Aimbot')
+AimbotGroupBox:AddToggle('AimbotToggle', { Text = 'Enable Aimbot (in development)', Default = false, Tooltip = 'Automatically aims at enemies' })
+AimbotGroupBox:AddDropdown('AimbotTargetPartDropdown', {
+    Values = { 'Head', 'Torso', 'LowerTorso' },
+    Default = 1,
+    Text = 'Target Part',
+    Tooltip = 'Choose where the aimbot aims',
+    Callback = function(Value) print('[cb] Aimbot Target Part set to:', Value) end
+})
+Toggles.AimbotToggle:OnChanged(function() print('[cb] AimbotToggle changed to:', Toggles.AimbotToggle.Value) end)
+
+
+-- Hitbox Expander (right)
+local CombatRightGroupBox = Tabs.Combat:AddRightGroupbox('Hitbox Expander')
+CombatRightGroupBox:AddToggle('HitboxToggle', { Text = 'Enable Hitbox Expander', Default = false, Tooltip = 'Expands enemy hitboxes' })
+CombatRightGroupBox:AddDropdown('HitboxPartDropdown', {
+    Values = { 'Head', 'Torso' },
+    Default = 1,
+    Text = 'Hitbox Part',
+    Tooltip = 'Select which hitbox part to expand',
+    Callback = function(Value) print('[cb] HitboxPart selected:', Value) end
+})
+CombatRightGroupBox:AddSlider('HitboxSizeSlider', {
+    Text = 'Hitbox Size', Default = 2, Min = 1, Max = 10, Rounding = 1,
+    Tooltip = 'Adjust hitbox expansion size',
+})
+Toggles.HitboxToggle:OnChanged(function() print('[cb] HitboxToggle changed to:', Toggles.HitboxToggle.Value) end)
+
+-- Gun Mods
+local WeaponControlBox = Tabs.Combat:AddLeftGroupbox('Gun Mods')
+WeaponControlBox:AddToggle('NoRecoilToggle', { Text = 'No Recoil', Default = false, Tooltip = 'Removes weapon recoil' })
+WeaponControlBox:AddSlider('RecoilStrengthSlider', {
+    Text = 'Recoil Reduction', Default = 100, Min = 0, Max = 100, Rounding = 0,
+    Tooltip = 'Adjust recoil reduction percentage (0 = none, 100 = full remove)',
+    Callback = function(Value) print('[cb] RecoilStrengthSlider changed to:', Value) end
+})
+WeaponControlBox:AddToggle('NoSpreadToggle', { Text = 'No Spread', Default = false, Tooltip = 'Removes bullet spread' })
+WeaponControlBox:AddSlider('SpreadStrengthSlider', {
+    Text = 'Spread Reduction', Default = 100, Min = 0, Max = 100, Rounding = 0,
+    Tooltip = 'Adjust bullet spread reduction percentage (0 = none, 100 = full remove)',
+    Callback = function(Value) print('[cb] SpreadStrengthSlider changed to:', Value) end
+})
+Toggles.NoRecoilToggle:OnChanged(function() print('[cb] NoRecoilToggle changed to:', Toggles.NoRecoilToggle.Value) end)
+Toggles.NoSpreadToggle:OnChanged(function() print('[cb] NoSpreadToggle changed to:', Toggles.NoSpreadToggle.Value) end)
+
+-- FOV Circle (right, below gun mods)
+local FOVCircleGroupBox = Tabs.Combat:AddRightGroupbox('FOV Circle')
+FOVCircleGroupBox:AddToggle('FOVCircleEnabled', { Text = 'Enable FOV Circle', Default = false, Tooltip = 'Show FOV circle' })
+FOVCircleGroupBox:AddSlider('FOVCircleRadius', {
+    Text = 'FOV Radius', Default = 100, Min = 10, Max = 500, Rounding = 0,
+    Tooltip = 'Adjust FOV circle radius',
+})
+FOVCircleGroupBox:AddLabel('FOV Circle Color'):AddColorPicker('FOVCircleColor', {
+    Default = Color3.fromRGB(255,255,255),
+    Title = 'FOV Circle Color',
+    Transparency = 0,
+    Tooltip = 'Pick the FOV circle color',
+})
+
+local TabBox = Tabs.Visuals:AddLeftTabbox()
+local TabESP = TabBox:AddTab('Player ESP')
+TabESP:AddToggle('PlayerESPEnableToggle', { Text = 'Enable' })
+TabESP:AddToggle('PlayerESPBoxToggle', { Text = 'Box' })
+TabESP:AddToggle('PlayerESPNameToggle', { Text = 'Username/Name Tags' })
+TabESP:AddToggle('PlayerESPSkeletonToggle', { Text = 'Skeleton' })
+TabESP:AddToggle('PlayerESPDistToggle', { Text = 'Distance' })
+TabESP:AddToggle('PlayerESPWeaponToggle', { Text = 'Weapon' })
+TabESP:AddToggle('PlayerESPChamsToggle', { Text = 'Chams' })
+TabESP:AddToggle('PlayerESPLookDirToggle', { Text = 'Look Direction' })
+TabESP:AddToggle('PlayerESPHealthToggle', { Text = 'Health' })
+TabESP:AddToggle('PlayerESPTracersToggle', { Text = 'Tracers' })
+
+local TabESP2 = TabBox:AddTab('Object ESP')
+TabESP2:AddToggle('ObjectESPEnableToggle', { Text = 'Enable' })
+TabESP2:AddDropdown('MyMultiDropdown', {
+    Values = { 'Stone', 'Iron', 'Nitrate', 'TC', },
+    Default = 1,
+    Multi = true,
+    Text = 'Objects',
+    Tooltip = 'Select multiple objects',
+})
+TabESP2:AddToggle('ObjectESPchamsToggle', { Text = 'Chams' })
+TabESP2:AddToggle('ObjectESPnamesToggle', { Text = 'Names' })
+TabESP2:AddToggle('ObjectESPdistanceToggle', { Text = 'Distance' })
+TabESP2:AddToggle('ObjectESPtracersToggle', { Text = 'Tracers' })
+
+local TabBox = Tabs.Visuals:AddRightTabbox()
+local TabChams = TabBox:AddTab('Arm chams')
+TabChams:AddToggle('EnableArmChams', { Text = 'Enable' })
+TabChams:AddToggle('EnableArmChams', { Text = 'Rainbow' })
+TabChams:AddLabel('Color'):AddColorPicker('ColorPicker', {
+    Default = Color3.new(0, 1, 0),
+    Title = 'Arms color',
+    Transparency = 0,
+    Callback = function(Value) end
+})
+
+Options.ColorPicker:SetValueRGB(Color3.fromRGB(0, 255, 140))
+
+local TabChams2 = TabBox:AddTab('Weapon chams')
+TabChams2:AddToggle('EnableWeaponChams', { Text = 'Enable' })
+TabChams2:AddToggle('EnableArmChams', { Text = 'Rainbow' })
+TabChams2:AddLabel('Color'):AddColorPicker('ColorPicker', {
+    Default = Color3.new(0, 1, 0),
+    Title = 'Weapon color',
+    Transparency = 0,
+    Callback = function(Value) end
+})
+
+Options.ColorPicker:SetValueRGB(Color3.fromRGB(0, 255, 140))
+
+local LeftGroupbox = Tabs.World:AddLeftGroupbox('World Visuals')
+LeftGroupbox:AddLabel('Configure world visuals below!')
+LeftGroupbox:AddDivider()
+
+LeftGroupbox:AddToggle('AmbientLightingToggle', { Text = 'Ambient Lighting', Default = false, Tooltip = 'Enable to adjust ambient lighting' })
+local AmbientDepbox = LeftGroupbox:AddDependencyBox()
+AmbientDepbox:AddSlider('AmbientLightingSlider', {
+    Text = 'Ambient Lighting Intensity', Default = 1, Min = 0, Max = 2, Rounding = 2,
+    Tooltip = 'Adjusts the world\'s ambient lighting intensity'
+})
+AmbientDepbox:SetupDependencies({ { Toggles.AmbientLightingToggle, true } })
+Toggles.AmbientLightingToggle:OnChanged(function() print('AmbientLightingToggle changed to:', Toggles.AmbientLightingToggle.Value) end)
+Options.AmbientLightingSlider:SetValue(1)
+
+LeftGroupbox:AddToggle('SkyboxesToggle', { Text = 'Skyboxes', Default = false, Tooltip = 'Enable to customize skybox visuals' })
+local SkyboxesDepbox = LeftGroupbox:AddDependencyBox()
+SkyboxesDepbox:AddDropdown('SkyboxesDropdown', {
+    Text = 'Skybox Preset', Default = 1, Values = {'Default', 'Night', 'Sunset', 'Psychedelic'},
+    Tooltip = 'Select a skybox preset'
+})
+SkyboxesDepbox:SetupDependencies({ { Toggles.SkyboxesToggle, true } })
+Toggles.SkyboxesToggle:OnChanged(function() print('SkyboxesToggle changed to:', Toggles.SkyboxesToggle.Value) end)
+Options.SkyboxesDropdown:SetValue('Default')
+
+LeftGroupbox:AddToggle('WatermarkToggle', { Text = 'Watermark', Default = false, Tooltip = 'Enable to show watermark' })
+local WatermarkDepbox = LeftGroupbox:AddDependencyBox()
+WatermarkDepbox:AddLabel('Watermark Color'):AddColorPicker('WatermarkColorPicker', {
+    Default = Color3.fromRGB(255,255,255),
+    Title = 'Watermark Color',
+    Transparency = 0,
+    Tooltip = 'Set watermark color',
+})
+WatermarkDepbox:SetupDependencies({ { Toggles.WatermarkToggle, true } })
+Toggles.WatermarkToggle:OnChanged(function() print('WatermarkToggle changed to:', Toggles.WatermarkToggle.Value) end)
+Options.WatermarkColorPicker:SetValueRGB(Color3.fromRGB(255,255,255))
+
+LeftGroupbox:AddToggle('FPSCounter', { Text = 'FPS Counter', Default = false, Tooltip = 'Displays FPS and performance metrics' })
+Toggles.FPSCounter:OnChanged(function() print('FPSCounter changed to:', Toggles.FPSCounter.Value) end)
+
+LeftGroupbox:AddToggle('FreecamToggle', { Text = 'Freecam', Default = false, Tooltip = 'Enable free camera movement' })
+local FreecamDepbox = LeftGroupbox:AddDependencyBox()
+FreecamDepbox:AddLabel('Freecam Key'):AddKeyPicker('FreecamKeyPicker', {
+    Default = 'F', SyncToggleState = false, Mode = 'Toggle', Text = 'Freecam activation key', NoUI = false,
+    Tooltip = 'Set key to activate freecam',
+})
+FreecamDepbox:SetupDependencies({ { Toggles.FreecamToggle, true } })
+Toggles.FreecamToggle:OnChanged(function() print('FreecamToggle changed to:', Toggles.FreecamToggle.Value) end)
+Options.FreecamKeyPicker:SetValue({ 'F', 'Toggle' })
+
+LeftGroupbox:AddToggle('XRay', { Text = 'X-Ray', Default = false, Tooltip = 'Enables see-through walls for objects' })
+Toggles.XRay:OnChanged(function() print('XRay changed to:', Toggles.XRay.Value) end)
+
+local CameraTabbox = Tabs.World:AddRightTabbox()
+local CameraControlsTab = CameraTabbox:AddTab('Camera Controls')
+CameraControlsTab:AddLabel('Adjust camera settings below!')
+CameraControlsTab:AddDivider()
+
+CameraControlsTab:AddToggle('FOVCameraToggle', { Text = 'FOV Camera', Default = false, Tooltip = 'Enable to adjust field of view' })
+local FOVDepbox = CameraControlsTab:AddDependencyBox()
+FOVDepbox:AddSlider('FOVCameraSlider', { Text = 'FOV Camera Slider', Default = 60, Min = 30, Max = 120, Rounding = 0 })
+FOVDepbox:SetupDependencies({ { Toggles.FOVCameraToggle, true } })
+Toggles.FOVCameraToggle:OnChanged(function() print('FOVCameraToggle changed to:', Toggles.FOVCameraToggle.Value) end)
+Options.FOVCameraSlider:SetValue(60)
+
+CameraControlsTab:AddToggle('ZoomAbilityToggle', { Text = 'Zoom Ability', Default = false, Tooltip = 'Enable to adjust zoom level' })
+local ZoomDepbox = CameraControlsTab:AddDependencyBox()
+ZoomDepbox:AddSlider('ZoomAbilitySlider', { Text = 'Zoom Ability Slider', Default = 1, Min = 0.5, Max = 5, Rounding = 1 })
+ZoomDepbox:AddLabel('Zoom Key'):AddKeyPicker('ZoomKeyPicker', {
+    Default = 'Z', SyncToggleState = false, Mode = 'Toggle', Text = 'Zoom activation key', NoUI = false,
+})
+ZoomDepbox:SetupDependencies({ { Toggles.ZoomAbilityToggle, true } })
+Toggles.ZoomAbilityToggle:OnChanged(function() print('ZoomAbilityToggle changed to:', Toggles.ZoomAbilityToggle.Value) end)
+Options.ZoomAbilitySlider:SetValue(1)
+Options.ZoomKeyPicker:SetValue({ 'Z', 'Toggle' })
+
+local RunService = game:GetService("RunService")
+local watermarkEnabled = true
+local watermarkText = Drawing.new("Text")
+watermarkText.ZIndex = 2
+watermarkText.Transparency = 1
+watermarkText.Outline = true
+watermarkText.OutlineColor = Color3.new()
+watermarkText.Font = Drawing.Fonts.UI
+watermarkText.Size = 18
+
+local watermarkBox = Drawing.new("Square")
+watermarkBox.ZIndex = 1
+watermarkBox.Filled = true
+watermarkBox.Color = Color3.new(0, 0, 0)
+watermarkBox.Transparency = 0.5
+
+local fpstimer, fps, finalfps = tick(), 0, 60
+RunService.RenderStepped:Connect(function()
+    fps = fps + 1
+    if fpstimer + 1 <= tick() then
+        fpstimer = tick()
+        finalfps = fps
+        fps = 0
+    end
+
+    local hue = (tick() % 5) / 5
+    watermarkText.Color = Color3.fromHSV(hue, 1, 1)
+
+    watermarkText.Text = ("Execly.gay | %s | %s fps"):format(
+        os.date("%b %d %Y"),
+        tostring(finalfps)
+    )
+
+    local pos = Vector2.new(10, 10)
+    watermarkText.Position = pos
+
+    watermarkBox.Position = pos - Vector2.new(5, 5)
+    watermarkBox.Size = Vector2.new(watermarkText.TextBounds.X + 10, watermarkText.TextBounds.Y + 10)
+
+    watermarkText.Visible = watermarkEnabled and Toggles.WatermarkToggle and Toggles.WatermarkToggle.Value
+    watermarkBox.Visible = watermarkEnabled and Toggles.WatermarkToggle and Toggles.WatermarkToggle.Value
+end)
+
+Library.KeybindFrame.Visible = true
+
+Library:OnUnload(function()
+    if watermarkText then watermarkText:Remove() end
+    if watermarkBox then watermarkBox:Remove() end
+    if _G.UnloadESP then _G.UnloadESP() end
+    print('Unloaded!')
+    Library.Unloaded = true
+end)
+
+local MenuGroup = Tabs['UI Settings']:AddLeftGroupbox('Menu Controls')
+MenuGroup:AddButton('Unload', function() Library:Unload() end)
+MenuGroup:AddLabel('Menu Keybind'):AddKeyPicker('MenuKeybind', { Default = 'End', NoUI = true, Text = 'Menu Keybind' })
+MenuGroup:AddToggle('KeybindVisibility', {
+    Text = 'Show Keybind Frame',
+    Default = true,
+    Tooltip = 'Toggles visibility of the keybind list',
+    Callback = function(Value) Library.KeybindFrame.Visible = Value end
+})
+
+local UITools = Tabs['UI Settings']:AddRightGroupbox('UI Tools')
+UITools:AddLabel('Theme Settings')
+-- Attach managers to library before applying:
+ThemeManager:SetLibrary(Library)
+SaveManager:SetLibrary(Library)
+
+UITools:AddDivider()
+UITools:AddLabel('Configuration Settings')
+SaveManager:BuildConfigSection(Tabs['UI Settings'])
+ThemeManager:ApplyToTab(Tabs['UI Settings'])
+
+SaveManager:IgnoreThemeSettings()
+SaveManager:SetIgnoreIndexes({ 'MenuKeybind' })
+
+ThemeManager:SetFolder('ExeclyGayModded')
+SaveManager:SetFolder('ExeclyGayModded/game')
+
+Library.ToggleKeybind = Options.MenuKeybind
+SaveManager:LoadAutoloadConfig()
