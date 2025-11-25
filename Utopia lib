@@ -1210,6 +1210,19 @@ local Library do
         end
     end
 
+    Library.Toggle = function(self)
+        if self.Holder and self.Holder.Instance then
+            self.Holder.Instance.Enabled = not self.Holder.Instance.Enabled
+            return self.Holder.Instance.Enabled
+        end
+    end
+
+    Library.SetVisibility = function(self, Bool)
+        if self.Holder and self.Holder.Instance then
+            self.Holder.Instance.Enabled = Bool
+        end
+    end
+
     Library.Watermark = function(self, Text, Icon)
         local Watermark = { }
 
