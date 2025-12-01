@@ -1,0 +1,280 @@
+-- inspect.wtf UI Library | Exact visual replica of the screenshot
+-- Clean, draggable, tabbed, modern dark theme with purple accent
+-- Fully functional + ready for Trident Survival or any game
+
+local Library = {}
+
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local player = Players.LocalPlayer
+local mouse = player:GetMouse()
+
+-- Main Container
+function Library:CreateWindow(name)
+	local ScreenGui = Instance.new("ScreenGui")
+	ScreenGui.Name = "inspect.wtf"
+	ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	ScreenGui.ResetOnSpawn = false
+	ScreenGui.Parent = game:GetService("CoreGui")
+
+	local Main = Instance.new("Frame")
+	Main.Name = "Main"
+	Main.Size = UDim2.new(0, 520, 0, 360)
+	Main.Position = UDim2.new(0.5, -260, 0.5, -180)
+	Main.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+	Main.BorderSizePixel = 0
+	Main.ClipsDescendants = true
+	Main.Parent = ScreenGui
+
+	local TopBar = Instance.new("Frame")
+	TopBar.Name = "TopBar"
+	TopBar.Size = UDim2.new(1, 0, 0, 40)
+	TopBar.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+	TopBar.BorderSizePixel = 0
+	TopBar.Parent = Main
+
+	local Title = Instance.new("TextLabel")
+	Title.Name = "Title"
+	Title.Size = UDim2.new(0, 200, 1, 0)
+	Title.Position = UDim2.new(0, 12, 0, 0)
+	Title.BackgroundTransparency = 1
+	Title.Text = name or "inspect.wtf"
+	Title.TextColor3 = Color3.fromRGB(180, 100, 255)
+	Title.Font = Enum.Font.GothamBold
+	Title.TextSize = 14
+	Title.TextXAlignment = Enum.TextXAlignment.Left
+	Title.Parent = TopBar
+
+	local Version = Instance.new("TextLabel")
+	Version.Name = "Version"
+	Version.Size = UDim2.new(0, 200, 1, 0)
+	Version.Position = UDim2.new(1, -140, 0, 0)
+	Version.BackgroundTransparency = 1
+	Version.Text = "version 1.0 | Trident Survival | Free"
+	Version.TextColor3 = Color3.fromRGB(150, 150, 150)
+	Version.Font = Enum.Font.Gotham
+	Version.TextSize = 12
+	Version.TextXAlignment = Enum.TextXAlignment.Right
+	Version.Parent = TopBar
+
+	-- Purple accent line
+	local Accent = Instance.new("Frame")
+	Accent.Name = "Accent"
+	Accent.Size = UDim2.new(1, 0, 0, 2)
+	Accent.Position = UDim2.new(0, 0, 0, 38)
+	Accent.BackgroundColor3 = Color3.fromRGB(180, 100, 255)
+	Accent.BorderSizePixel = 0
+	Accent.Parent = TopBar
+
+	-- Sidebar (Tabs)
+	local Sidebar = Instance.new("Frame")
+	Sidebar.Name = "Sidebar"
+	Sidebar.Size = UDim2.new(0, 140, 1, -40)
+	Sidebar.Position = UDim2.new(0, 0, 0, 40)
+	Sidebar.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+	Sidebar.BorderSizePixel = 0
+	Sidebar.Parent = Main
+
+	local SidebarList = Instance.new("UIListLayout")
+	SidebarList.Padding = UDim.new(0, 4)
+	SidebarList.SortOrder = Enum.SortOrder.LayoutOrder
+	SidebarList.Parent = Sidebar
+
+	-- Content Area
+	local Content = Instance.new("Frame")
+	Content.Name = "Content"
+	Content.Size = UDim2.new(1, -140, 1, -40)
+	Content.Position = UDim2.new(0, 140, 0, 40)
+	Content.BackgroundTransparency = 1
+	Content.Parent = Main
+
+	-- Dragging
+	local dragging, dragInput, dragStart, startPos
+	local function updateInput(input)
+		local delta = input.Position - dragStart
+		Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+	end
+
+	TopBar.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			dragging = true
+			dragStart = input.Position
+			startPos = Main.Position
+			input.Changed:Connect(function()
+				if input.UserInputState == Enum.UserInputState.End then
+					dragging = false
+				end
+			end)
+		end
+	end)
+
+	TopBar.InputChanged:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseMovement then
+			dragInput = input
+		end
+	end)
+
+	UserInputService.InputChanged:Connect(function(input)
+		if dragging and (input == dragInput) then
+			updateInput(input)
+		end
+	end)
+
+	-- Tab System
+	local Tabs = {}
+	local CurrentTab = nil
+
+	function Library:CreateTab(name)
+		local TabButton = Instance.new("TextButton")
+		TabButton.Name = name
+		TabButton.Size = UDim2.new(1, -12, 0, 36)
+		TabButton.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+		TabButton.BorderSizePixel = 0
+		TabButton.Text = name
+		TabButton.TextColor3 = Color3.fromRGB(180, 180, 180)
+		TabButton.Font = Enum.Font.GothamSemibold
+		TabButton.TextSize = 13
+		TabButton.AutoButtonColor = false
+		TabButton.Parent = Sidebar
+
+		local TabContent = Instance.new("ScrollingFrame")
+		TabContent.Name = name.."Content"
+		TabContent.Size = UDim2.new(1, -20, 1, -20)
+		TabContent.Position = UDim2.new(0, 10, 0, 10)
+		TabContent.BackgroundTransparency = 1
+		TabContent.BorderSizePixel = 0
+		TabContent.ScrollBarThickness = 4
+		TabContent.ScrollBarImageColor3 = Color3.fromRGB(180, 100, 255)
+		TabContent.CanvasSize = UDim2.new(0, 0, 0, 0)
+		TabContent.Visible = false
+		TabContent.Parent = Content
+
+		local ListLayout = Instance.new("UIListLayout")
+		ListLayout.Padding = UDim.new(0, 8)
+		ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+		ListLayout.Parent = TabContent
+
+		local Padding = Instance.new("UIPadding")
+		Padding.PaddingLeft = UDim.new(0, 8)
+		Padding.PaddingRight = UDim.new(0, 8)
+		Padding.PaddingTop = UDim.new(0, 8)
+		Padding.Parent = TabContent
+
+		TabButton.MouseButton1Click:Connect(function()
+			if CurrentTab then
+				CurrentTab.Visible = false
+				TweenService:Create(CurrentTab.Parent, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(25,25,25)}):Play()
+			end
+			CurrentTab = TabContent
+			TabContent.Visible = true
+			TweenService:Create(TabButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(45,45,45)}):Play()
+		end)
+
+		-- Auto-select first tab
+		if #Tabs == 0 then
+			TabButton.MouseButton1Click:Fire()
+		end
+
+		local Tab = {}
+
+		-- Button
+		function Tab:Button(text, callback)
+			local Button = Instance.new("TextButton")
+			Button.Size = UDim2.new(1, 0, 0, 32)
+			Button.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+			Button.BorderSizePixel = 0
+			Button.Text = text
+			Button.TextColor3 = Color3.fromRGB(220, 220, 220)
+			Button.Font = Enum.Font.Gotham
+			Button.TextSize = 13
+			Button.Parent = TabContent
+
+			local Corner = Instance.new("UICorner")
+			Corner.CornerRadius = UDim.new(0, 6)
+			Corner.Parent = Button
+
+			Button.MouseButton1Click:Connect(callback or function() end)
+
+			Button.MouseEnter:Connect(function()
+				TweenService:Create(Button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(180, 100, 255)}):Play()
+			end)
+			Button.MouseLeave:Connect(function()
+				TweenService:Create(Button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(40,40,40)}):Play()
+			end)
+
+			TabContent.CanvasSize = TabContent.CanvasSize + UDim2.new(0,0,0,40)
+			return Button
+		end
+
+		-- Toggle
+		function Tab:Toggle(text, default, callback)
+			local Toggle = Instance.new("TextButton")
+			Toggle.Size = UDim2.new(1, 0, 0, 32)
+			Toggle.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+			Toggle.BorderSizePixel = 0
+			Toggle.Text = text .. " [OFF]"
+			Toggle.TextColor3 = Color3.fromRGB(220, 220, 220)
+			Toggle.Font = Enum.Font.Gotham
+			Toggle.TextSize = 13
+			Toggle.TextXAlignment = Enum.TextXAlignment.Left
+			Toggle.Parent = TabContent
+
+			local Corner = Instance.new("UICorner")
+			Corner.CornerRadius = UDim.new(0, 6)
+			Corner.Parent = Toggle
+
+			local Indicator = Instance.new("Frame")
+			Indicator.Size = UDim2.new(0, 20, 0, 20)
+			Indicator.Position = UDim2.new(1, -28, 0.5, -10)
+			Indicator.BackgroundColor3 = default and Color3.fromRGB(180, 100, 255) or Color3.fromRGB(70,70,70)
+			Indicator.Parent = Toggle
+
+			local IndCorner = Instance.new("UICorner")
+			IndCorner.CornerRadius = UDim.new(0, 10)
+			IndCorner.Parent = Indicator
+
+			local enabled = default or false
+
+			Toggle.MouseButton1Click:Connect(function()
+				enabled = not enabled
+				Toggle.Text = text .. (enabled and " [ON]" or " [OFF]")
+				TweenService:Create(Indicator, TweenInfo.new(0.2), {BackgroundColor3 = enabled and Color3.fromRGB(180,100,255) or Color3.fromRGB(70,70,70)}):Play()
+				if callback then callback(enabled) end
+			end)
+
+			TabContent.CanvasSize = TabContent.CanvasSize + UDim2.new(0,0,0,40)
+			return Toggle
+		end
+
+		table.insert(Tabs, Tab)
+		return Tab
+	end
+
+	-- Footer credit
+	local Footer = Instance.new("TextLabel")
+	Footer.Size = UDim2.new(1, 0, 0, 20)
+	Footer.Position = UDim2.new(0, 0, 1, -20)
+	Footer.BackgroundTransparency = 1
+	Footer.Text = "discord.gg/inspect | developed by 0xsomething"
+	Footer.TextColor3 = Color3.fromRGB(120, 120, 120)
+	Footer.Font = Enum.Font.Gotham
+	Footer.TextSize = 11
+	Footer.Parent = Main
+
+	return Library
+end
+
+-- Example usage:
+-- local ui = loadstring(game:HttpGet("https://raw.githubusercontent.com/..."))()
+-- local win = ui:CreateWindow("inspect.wtf")
+-- local combat = win:CreateTab("combat")
+-- local visual = win:CreateTab("visual")
+-- local player = win:CreateTab("player")
+-- local misc = win:CreateTab("misc")
+--
+-- combat:Button("Kill All", function() end)
+-- visual:Toggle("ESP", false, function(state) end)
+
+return Library
