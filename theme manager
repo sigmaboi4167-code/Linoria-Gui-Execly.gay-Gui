@@ -1,20 +1,127 @@
 local httpService = game:GetService('HttpService')
+local RunService = game:GetService('RunService')
 local ThemeManager = {}
 
 do
     ThemeManager.Folder = 'LinoriaLibSettings'
-    -- if not isfolder(ThemeManager.Folder) then makefolder(ThemeManager.Folder) end
     ThemeManager.Library = nil
+    ThemeManager.AnimationConnection = nil
+    ThemeManager.Snowflakes = {}
+    ThemeManager.SnowContainer = nil
     ThemeManager.BuiltInThemes = {
-        ['Default'] = { 1, httpService:JSONDecode('{"FontColor":"ffffff","MainColor":"1c1c1c","AccentColor":"#4a95cb","BackgroundColor":"141414","OutlineColor":"323232"}') },
-        ['BBot'] = { 2, httpService:JSONDecode('{"FontColor":"ffffff","MainColor":"1e1e1e","AccentColor":"7e48a3","BackgroundColor":"232323","OutlineColor":"141414"}') },
-        ['Fatality'] = { 3, httpService:JSONDecode('{"FontColor":"ffffff","MainColor":"1e1842","AccentColor":"c50754","BackgroundColor":"191335","OutlineColor":"3c355d"}') },
-        ['Jester'] = { 4, httpService:JSONDecode('{"FontColor":"ffffff","MainColor":"242424","AccentColor":"db4467","BackgroundColor":"1c1c1c","OutlineColor":"373737"}') },
-        ['Mint'] = { 5, httpService:JSONDecode('{"FontColor":"ffffff","MainColor":"242424","AccentColor":"3db488","BackgroundColor":"1c1c1c","OutlineColor":"373737"}') },
-        ['Tokyo Night'] = { 6, httpService:JSONDecode('{"FontColor":"ffffff","MainColor":"191925","AccentColor":"6759b3","BackgroundColor":"16161f","OutlineColor":"323232"}') },
-        ['Ubuntu'] = { 7, httpService:JSONDecode('{"FontColor":"ffffff","MainColor":"3e3e3e","AccentColor":"e2581e","BackgroundColor":"323232","OutlineColor":"191919"}') },
-        ['Quartz'] = { 8, httpService:JSONDecode('{"FontColor":"ffffff","MainColor":"232330","AccentColor":"426e87","BackgroundColor":"1d1b26","OutlineColor":"27232f"}') },
+        ['Default'] = { 1, httpService:JSONDecode('{"FontColor":"ffffff","MainColor":"1c1c1c","AccentColor":"4a95cb","BackgroundColor":"141414","OutlineColor":"323232"}') },
+        ['Blue Wave'] = { 2, httpService:JSONDecode('{"FontColor":"e0f7ff","MainColor":"0a1628","AccentColor":"00d4ff","BackgroundColor":"050d1a","OutlineColor":"1a3a52"}') },
+        ['BBot'] = { 3, httpService:JSONDecode('{"FontColor":"ffffff","MainColor":"1e1e1e","AccentColor":"7e48a3","BackgroundColor":"232323","OutlineColor":"141414"}') },
+        ['Fatality'] = { 4, httpService:JSONDecode('{"FontColor":"ffffff","MainColor":"1e1842","AccentColor":"c50754","BackgroundColor":"191335","OutlineColor":"3c355d"}') },
+        ['Jester'] = { 5, httpService:JSONDecode('{"FontColor":"ffffff","MainColor":"242424","AccentColor":"db4467","BackgroundColor":"1c1c1c","OutlineColor":"373737"}') },
+        ['Mint'] = { 6, httpService:JSONDecode('{"FontColor":"ffffff","MainColor":"242424","AccentColor":"3db488","BackgroundColor":"1c1c1c","OutlineColor":"373737"}') },
+        ['Tokyo Night'] = { 7, httpService:JSONDecode('{"FontColor":"ffffff","MainColor":"191925","AccentColor":"6759b3","BackgroundColor":"16161f","OutlineColor":"323232"}') },
+        ['Ubuntu'] = { 8, httpService:JSONDecode('{"FontColor":"ffffff","MainColor":"3e3e3e","AccentColor":"e2581e","BackgroundColor":"323232","OutlineColor":"191919"}') },
+        ['Quartz'] = { 9, httpService:JSONDecode('{"FontColor":"ffffff","MainColor":"232330","AccentColor":"426e87","BackgroundColor":"1d1b26","OutlineColor":"27232f"}') },
     }
+
+    function ThemeManager:StartRGBAnimation()
+        if self.AnimationConnection then return end
+        
+        local hue = 0
+        self.AnimationConnection = RunService.Heartbeat:Connect(function(dt)
+            hue = (hue + dt * 0.2) % 1
+            
+            -- Cycle through blue spectrum only for outline
+            local blueHue = 0.5 + (math.sin(hue * math.pi * 2) * 0.15)
+            local outlineColor = Color3.fromHSV(blueHue, 0.9, 1)
+            
+            if self.Library and self.Library.OutlineColor then
+                self.Library.OutlineColor = outlineColor
+                self.Library:UpdateColorsUsingRegistry()
+            end
+        end)
+    end
+
+    function ThemeManager:StopRGBAnimation()
+        if self.AnimationConnection then
+            self.AnimationConnection:Disconnect()
+            self.AnimationConnection = nil
+        end
+    end
+
+    function ThemeManager:ClearSnowEffect()
+        if self.SnowContainer then
+            self.SnowContainer:Destroy()
+            self.SnowContainer = nil
+        end
+        self.Snowflakes = {}
+    end
+
+    function ThemeManager:CreateSnowEffect(mainFrame)
+        if not mainFrame then return end
+        
+        self:ClearSnowEffect()
+        
+        -- Create snow container on the main frame
+        local snowContainer = Instance.new("Frame")
+        snowContainer.Name = "SnowEffect"
+        snowContainer.Size = UDim2.new(1, 0, 1, 0)
+        snowContainer.Position = UDim2.new(0, 0, 0, 0)
+        snowContainer.BackgroundTransparency = 1
+        snowContainer.ZIndex = 100
+        snowContainer.Parent = mainFrame
+        
+        self.SnowContainer = snowContainer
+        
+        -- Create snowflakes
+        for i = 1, 50 do
+            task.wait(0.05) -- Spawn delay for random effect
+            
+            local snowflake = Instance.new("Frame")
+            snowflake.Name = "Snowflake"
+            snowflake.Size = UDim2.new(0, math.random(4, 8), 0, math.random(4, 8))
+            snowflake.Position = UDim2.new(math.random(0, 100) / 100, 0, -0.1, 0)
+            snowflake.BackgroundColor3 = Color3.fromRGB(200, 230, 255)
+            snowflake.BackgroundTransparency = math.random(10, 40) / 100
+            snowflake.BorderSizePixel = 0
+            snowflake.ZIndex = 101
+            snowflake.Parent = snowContainer
+            
+            -- Round corners
+            local corner = Instance.new("UICorner")
+            corner.CornerRadius = UDim.new(1, 0)
+            corner.Parent = snowflake
+            
+            table.insert(self.Snowflakes, {
+                frame = snowflake,
+                speed = math.random(25, 70) / 1000,
+                sway = math.random(-20, 20) / 1000,
+                swaySpeed = math.random(10, 30) / 10,
+                startX = math.random(0, 100) / 100
+            })
+        end
+        
+        -- Animate snowflakes
+        RunService.Heartbeat:Connect(function(dt)
+            for _, snow in ipairs(self.Snowflakes) do
+                if snow.frame and snow.frame.Parent then
+                    local currentPos = snow.frame.Position
+                    local newY = currentPos.Y.Scale + snow.speed
+                    local sway = math.sin(tick() * snow.swaySpeed) * snow.sway
+                    local newX = currentPos.X.Scale + sway
+                    
+                    -- Reset to top with new random X position when reaching bottom
+                    if newY > 1.15 then
+                        newY = -0.1
+                        newX = math.random(0, 100) / 100
+                        snow.startX = newX
+                    end
+                    
+                    -- Keep within bounds
+                    if newX < -0.05 then newX = -0.05 end
+                    if newX > 1.05 then newX = 1.05 end
+                    
+                    snow.frame.Position = UDim2.new(newX, 0, newY, 0)
+                end
+            end
+        end)
+    end
 
     function ThemeManager:ApplyTheme(theme)
         local customThemeData = self:GetCustomTheme(theme)
@@ -26,6 +133,23 @@ do
             if Options[idx] then Options[idx]:SetValueRGB(Color3.fromHex(col)) end
         end
         self:ThemeUpdate()
+        
+        -- Start RGB animation and snow for Blue Wave theme
+        if theme == "Blue Wave" then
+            self:StartRGBAnimation()
+            
+            -- Try to find the main frame and add snow effect
+            task.spawn(function()
+                task.wait(0.5)
+                local mainFrame = self.Library and self.Library.MainFrame
+                if mainFrame then
+                    self:CreateSnowEffect(mainFrame)
+                end
+            end)
+        else
+            self:StopRGBAnimation()
+            self:ClearSnowEffect()
+        end
     end
 
     function ThemeManager:ThemeUpdate()
@@ -38,7 +162,7 @@ do
     end
 
     function ThemeManager:LoadDefault()
-        local theme = 'Default'
+        local theme = 'Blue Wave'
         local content = isfile(self.Folder .. '/themes/default.txt') and readfile(self.Folder .. '/themes/default.txt')
         local isDefault = true
         if content then
