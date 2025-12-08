@@ -27,13 +27,12 @@ do
         self.AnimationConnection = RunService.Heartbeat:Connect(function(dt)
             hue = (hue + dt * 0.2) % 1
             
-            -- Cycle through blue spectrum only (cyan -> blue -> deep blue -> cyan)
-            local blueHue = 0.5 + (math.sin(hue * math.pi * 2) * 0.15) -- Range: 0.35 to 0.65 (blue spectrum)
-            local accentColor = Color3.fromHSV(blueHue, 0.9, 1)
+            -- Cycle through blue spectrum only for outline
+            local blueHue = 0.5 + (math.sin(hue * math.pi * 2) * 0.15)
+            local outlineColor = Color3.fromHSV(blueHue, 0.9, 1)
             
-            if self.Library and self.Library.AccentColor then
-                self.Library.AccentColor = accentColor
-                self.Library.AccentColorDark = self.Library:GetDarkerColor(accentColor)
+            if self.Library and self.Library.OutlineColor then
+                self.Library.OutlineColor = outlineColor
                 self.Library:UpdateColorsUsingRegistry()
             end
         end)
@@ -71,13 +70,15 @@ do
         self.SnowContainer = snowContainer
         
         -- Create snowflakes
-        for i = 1, 40 do
+        for i = 1, 50 do
+            task.wait(0.05) -- Spawn delay for random effect
+            
             local snowflake = Instance.new("Frame")
             snowflake.Name = "Snowflake"
-            snowflake.Size = UDim2.new(0, math.random(3, 6), 0, math.random(3, 6))
+            snowflake.Size = UDim2.new(0, math.random(4, 8), 0, math.random(4, 8))
             snowflake.Position = UDim2.new(math.random(0, 100) / 100, 0, -0.1, 0)
-            snowflake.BackgroundColor3 = Color3.fromRGB(220, 240, 255)
-            snowflake.BackgroundTransparency = math.random(20, 60) / 100
+            snowflake.BackgroundColor3 = Color3.fromRGB(200, 230, 255)
+            snowflake.BackgroundTransparency = math.random(10, 40) / 100
             snowflake.BorderSizePixel = 0
             snowflake.ZIndex = 101
             snowflake.Parent = snowContainer
@@ -89,10 +90,10 @@ do
             
             table.insert(self.Snowflakes, {
                 frame = snowflake,
-                speed = math.random(30, 80) / 1000,
-                sway = math.random(-15, 15) / 1000,
-                swaySpeed = math.random(15, 40) / 10,
-                respawnDelay = math.random(0, 200) / 100
+                speed = math.random(25, 70) / 1000,
+                sway = math.random(-20, 20) / 1000,
+                swaySpeed = math.random(10, 30) / 10,
+                startX = math.random(0, 100) / 100
             })
         end
         
@@ -105,15 +106,16 @@ do
                     local sway = math.sin(tick() * snow.swaySpeed) * snow.sway
                     local newX = currentPos.X.Scale + sway
                     
-                    -- Reset to top when reaching bottom
-                    if newY > 1.1 then
+                    -- Reset to top with new random X position when reaching bottom
+                    if newY > 1.15 then
                         newY = -0.1
                         newX = math.random(0, 100) / 100
+                        snow.startX = newX
                     end
                     
                     -- Keep within bounds
-                    if newX < 0 then newX = 0 end
-                    if newX > 1 then newX = 1 end
+                    if newX < -0.05 then newX = -0.05 end
+                    if newX > 1.05 then newX = 1.05 end
                     
                     snow.frame.Position = UDim2.new(newX, 0, newY, 0)
                 end
@@ -137,7 +139,8 @@ do
             self:StartRGBAnimation()
             
             -- Try to find the main frame and add snow effect
-            task.delay(0.5, function()
+            task.spawn(function()
+                task.wait(0.5)
                 local mainFrame = self.Library and self.Library.MainFrame
                 if mainFrame then
                     self:CreateSnowEffect(mainFrame)
