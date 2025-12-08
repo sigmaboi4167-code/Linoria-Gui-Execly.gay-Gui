@@ -7,6 +7,7 @@ do
     ThemeManager.Library = nil
     ThemeManager.AnimationConnection = nil
     ThemeManager.Snowflakes = {}
+    ThemeManager.SnowContainer = nil
     ThemeManager.BuiltInThemes = {
         ['Default'] = { 1, httpService:JSONDecode('{"FontColor":"ffffff","MainColor":"1c1c1c","AccentColor":"4a95cb","BackgroundColor":"141414","OutlineColor":"323232"}') },
         ['Blue Wave'] = { 2, httpService:JSONDecode('{"FontColor":"e0f7ff","MainColor":"0a1628","AccentColor":"00d4ff","BackgroundColor":"050d1a","OutlineColor":"1a3a52"}') },
@@ -24,12 +25,11 @@ do
         
         local hue = 0
         self.AnimationConnection = RunService.Heartbeat:Connect(function(dt)
-            hue = (hue + dt * 0.3) % 1
+            hue = (hue + dt * 0.2) % 1
             
-            -- Create RGB wave effect - cycling through blue/cyan/purple spectrum
-            local baseHue = 0.55 -- Start at cyan/blue
-            local animatedHue = baseHue + (math.sin(hue * math.pi * 2) * 0.15)
-            local accentColor = Color3.fromHSV(animatedHue, 1, 1)
+            -- Cycle through blue spectrum only (cyan -> blue -> deep blue -> cyan)
+            local blueHue = 0.5 + (math.sin(hue * math.pi * 2) * 0.15) -- Range: 0.35 to 0.65 (blue spectrum)
+            local accentColor = Color3.fromHSV(blueHue, 0.9, 1)
             
             if self.Library and self.Library.AccentColor then
                 self.Library.AccentColor = accentColor
@@ -46,28 +46,40 @@ do
         end
     end
 
-    function ThemeManager:CreateSnowEffect(screenGui)
-        if not screenGui then return end
+    function ThemeManager:ClearSnowEffect()
+        if self.SnowContainer then
+            self.SnowContainer:Destroy()
+            self.SnowContainer = nil
+        end
+        self.Snowflakes = {}
+    end
+
+    function ThemeManager:CreateSnowEffect(mainFrame)
+        if not mainFrame then return end
         
-        -- Create snow container
+        self:ClearSnowEffect()
+        
+        -- Create snow container on the main frame
         local snowContainer = Instance.new("Frame")
         snowContainer.Name = "SnowEffect"
         snowContainer.Size = UDim2.new(1, 0, 1, 0)
         snowContainer.Position = UDim2.new(0, 0, 0, 0)
         snowContainer.BackgroundTransparency = 1
-        snowContainer.ZIndex = 1000
-        snowContainer.Parent = screenGui
+        snowContainer.ZIndex = 100
+        snowContainer.Parent = mainFrame
+        
+        self.SnowContainer = snowContainer
         
         -- Create snowflakes
-        for i = 1, 50 do
+        for i = 1, 40 do
             local snowflake = Instance.new("Frame")
             snowflake.Name = "Snowflake"
-            snowflake.Size = UDim2.new(0, math.random(2, 4), 0, math.random(2, 4))
-            snowflake.Position = UDim2.new(math.random(0, 100) / 100, 0, math.random(-50, 0) / 100, 0)
-            snowflake.BackgroundColor3 = Color3.fromRGB(200, 230, 255)
-            snowflake.BackgroundTransparency = math.random(0, 50) / 100
+            snowflake.Size = UDim2.new(0, math.random(3, 6), 0, math.random(3, 6))
+            snowflake.Position = UDim2.new(math.random(0, 100) / 100, 0, -0.1, 0)
+            snowflake.BackgroundColor3 = Color3.fromRGB(220, 240, 255)
+            snowflake.BackgroundTransparency = math.random(20, 60) / 100
             snowflake.BorderSizePixel = 0
-            snowflake.ZIndex = 1001
+            snowflake.ZIndex = 101
             snowflake.Parent = snowContainer
             
             -- Round corners
@@ -77,9 +89,10 @@ do
             
             table.insert(self.Snowflakes, {
                 frame = snowflake,
-                speed = math.random(20, 60) / 100,
-                sway = math.random(-10, 10) / 100,
-                swaySpeed = math.random(1, 3)
+                speed = math.random(30, 80) / 1000,
+                sway = math.random(-15, 15) / 1000,
+                swaySpeed = math.random(15, 40) / 10,
+                respawnDelay = math.random(0, 200) / 100
             })
         end
         
@@ -88,15 +101,19 @@ do
             for _, snow in ipairs(self.Snowflakes) do
                 if snow.frame and snow.frame.Parent then
                     local currentPos = snow.frame.Position
-                    local newY = currentPos.Y.Scale + (snow.speed * dt)
-                    local sway = math.sin(tick() * snow.swaySpeed) * snow.sway * dt
+                    local newY = currentPos.Y.Scale + snow.speed
+                    local sway = math.sin(tick() * snow.swaySpeed) * snow.sway
                     local newX = currentPos.X.Scale + sway
                     
                     -- Reset to top when reaching bottom
-                    if newY > 1.2 then
+                    if newY > 1.1 then
                         newY = -0.1
                         newX = math.random(0, 100) / 100
                     end
+                    
+                    -- Keep within bounds
+                    if newX < 0 then newX = 0 end
+                    if newX > 1 then newX = 1 end
                     
                     snow.frame.Position = UDim2.new(newX, 0, newY, 0)
                 end
@@ -115,19 +132,20 @@ do
         end
         self:ThemeUpdate()
         
-        -- Start RGB animation for Blue Wave theme
+        -- Start RGB animation and snow for Blue Wave theme
         if theme == "Blue Wave" then
             self:StartRGBAnimation()
             
-            -- Try to find the screen GUI and add snow effect
+            -- Try to find the main frame and add snow effect
             task.delay(0.5, function()
-                local screenGui = self.Library and self.Library.MainFrame and self.Library.MainFrame.Parent
-                if screenGui then
-                    self:CreateSnowEffect(screenGui)
+                local mainFrame = self.Library and self.Library.MainFrame
+                if mainFrame then
+                    self:CreateSnowEffect(mainFrame)
                 end
             end)
         else
             self:StopRGBAnimation()
+            self:ClearSnowEffect()
         end
     end
 
