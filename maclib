@@ -117,7 +117,9 @@ function MacLib:Window(Settings)
 	base.Position = UDim2.fromScale(0.5, 0.5)
 	-- Default size, but smaller for mobile
 	if isMobile then
-		base.Size = UDim2.fromOffset(340, 480)
+		-- Use a size that's about 80% of the normal desktop size, but keep proportions
+		base.Size = Settings.Size and UDim2.new(Settings.Size.X.Scale, math.floor((Settings.Size.X.Offset or 868) * 0.8), Settings.Size.Y.Scale, math.floor((Settings.Size.Y.Offset or 650) * 0.8))
+			or UDim2.fromOffset(694, 520)
 	else
 		base.Size = Settings.Size or UDim2.fromOffset(868, 650)
 	end
@@ -126,7 +128,7 @@ function MacLib:Window(Settings)
 	baseUIScale.Name = "BaseUIScale"
 	-- Scale down for mobile
 	if isMobile then
-		baseUIScale.Scale = 0.85
+		baseUIScale.Scale = 0.93 -- Only slightly smaller, keeps UI readable
 	end
 	baseUIScale.Parent = base
 
@@ -149,9 +151,9 @@ function MacLib:Window(Settings)
 	sidebar.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	sidebar.BorderSizePixel = 0
 	sidebar.Position = UDim2.fromScale(-3.52e-08, 4.69e-08)
-	-- Make sidebar thinner on mobile
+	-- Keep sidebar width proportional to desktop, just slightly smaller
 	if isMobile then
-		sidebar.Size = UDim2.fromScale(0.22, 1)
+		sidebar.Size = UDim2.fromScale(0.29, 1)
 	else
 		sidebar.Size = UDim2.fromScale(0.325, 1)
 	end
@@ -481,7 +483,7 @@ function MacLib:Window(Settings)
 	userInfo.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	userInfo.BorderSizePixel = 0
 	userInfo.Position = UDim2.fromScale(0, 1)
-	userInfo.Size = isMobile and UDim2.new(1, 0, 0, 60) or UDim2.new(1, 0, 0, 107)
+	userInfo.Size = isMobile and UDim2.new(1, 0, 0, 85) or UDim2.new(1, 0, 0, 107)
 
 	local informationGroup = Instance.new("Frame")
 	informationGroup.Name = "InformationGroup"
@@ -623,7 +625,7 @@ function MacLib:Window(Settings)
 	tabSwitchers.BackgroundTransparency = 1
 	tabSwitchers.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	tabSwitchers.BorderSizePixel = 0
-	tabSwitchers.Size = isMobile and UDim2.new(1, 0, 1, -60) or UDim2.new(1, 0, 1, -107)
+	tabSwitchers.Size = isMobile and UDim2.new(1, 0, 1, -85) or UDim2.new(1, 0, 1, -107)
 
 	local tabSwitchersScrollingFrame = Instance.new("ScrollingFrame")
 	tabSwitchersScrollingFrame.Name = "TabSwitchersScrollingFrame"
