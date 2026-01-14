@@ -932,7 +932,7 @@ function MacLib:Window(Settings)
 		local snowflake = Instance.new("Frame")
 		snowflake.Name = "Snowflake"
 		snowflake.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-		snowflake.BackgroundTransparency = 0.2
+		snowflake.BackgroundTransparency = 0
 		snowflake.BorderSizePixel = 0
 		snowflake.Parent = snowflakeContainer
 		
@@ -952,7 +952,7 @@ function MacLib:Window(Settings)
 
 		snowflake.Size = UDim2.fromOffset(size, size)
 		snowflake.Position = UDim2.fromScale(xPos, -0.02)
-		snowflake.BackgroundTransparency = 0.2
+		snowflake.BackgroundTransparency = 0
 
 		local duration = (1 / speed) * 1.5
 		local tween = Tween(snowflake, TweenInfo.new(duration, Enum.EasingStyle.Linear), {
@@ -978,6 +978,12 @@ function MacLib:Window(Settings)
 			task.wait(0.15)
 		end
 	end)
+	
+	-- Spawn initial batch of snowflakes
+	for i = 1, 10 do
+		spawnSnowflake()
+	end
+	
 	coroutine.resume(snowflakeSpawner)
 
 	local globalSettings = Instance.new("Frame")
