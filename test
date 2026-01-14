@@ -912,31 +912,29 @@ function MacLib:Window(Settings)
 	snowflakeContainer.BackgroundTransparency = 1
 	snowflakeContainer.BorderSizePixel = 0
 	snowflakeContainer.Size = UDim2.fromScale(1, 1)
-	snowflakeContainer.ClipsDescendants = false
+	snowflakeContainer.ClipsDescendants = true
 	snowflakeContainer.Parent = base
-	snowflakeContainer.ZIndex = 10
-	snowflakeContainer.Position = UDim2.fromScale(0, 0)
+	snowflakeContainer.ZIndex = 1
 
 	local snowflakePool = {}
 	local activeSnowflakes = {}
 	local snowflakeConfig = {
-		count = 50,
-		minSpeed = 1.0,
-		maxSpeed = 3.0,
-		minSize = 4,
-		maxSize = 9,
-		opacityMin = 0.15,
-		opacityMax = 0.65
+		count = 35,
+		minSpeed = 1.5,
+		maxSpeed = 3.5,
+		minSize = 3,
+		maxSize = 7,
+		opacityMin = 0.4,
+		opacityMax = 0.9
 	}
 
 	local function createSnowflake()
 		local snowflake = Instance.new("Frame")
 		snowflake.Name = "Snowflake"
 		snowflake.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-		snowflake.BackgroundTransparency = 0.05
+		snowflake.BackgroundTransparency = 0.2
 		snowflake.BorderSizePixel = 0
 		snowflake.Parent = snowflakeContainer
-		snowflake.ZIndex = 10
 		
 		local corner = Instance.new("UICorner")
 		corner.CornerRadius = UDim.new(1, 0)
@@ -948,31 +946,26 @@ function MacLib:Window(Settings)
 	local function spawnSnowflake()
 		local snowflake = table.remove(snowflakePool) or createSnowflake()
 		local size = math.random(snowflakeConfig.minSize * 10, snowflakeConfig.maxSize * 10) / 10
-		local containerSize = snowflakeContainer.AbsoluteSize
-		local xPos = math.random(0, math.floor(containerSize.X))
+		local xPos = math.random(0, 100) / 100
 		local speed = math.random(snowflakeConfig.minSpeed * 10, snowflakeConfig.maxSpeed * 10) / 10
-		local drift = (math.random(-50, 50) / 100) * containerSize.X * 0.3
+		local drift = math.random(-40, 40) / 100
 
 		snowflake.Size = UDim2.fromOffset(size, size)
-		snowflake.Position = UDim2.fromOffset(xPos, -size * 2)
-		snowflake.BackgroundTransparency = math.random(snowflakeConfig.opacityMin * 100, snowflakeConfig.opacityMax * 100) / 100
+		snowflake.Position = UDim2.fromScale(xPos, -0.02)
+		snowflake.BackgroundTransparency = 0.2
 
-		local duration = (containerSize.Y / (speed * 100)) + math.random(1, 3)
-		local finalY = containerSize.Y + size * 2
-		local finalX = math.clamp(xPos + drift, -size, containerSize.X + size)
-
+		local duration = (1 / speed) * 1.5
 		local tween = Tween(snowflake, TweenInfo.new(duration, Enum.EasingStyle.Linear), {
-			Position = UDim2.fromOffset(finalX, finalY)
+			Position = UDim2.fromScale(math.clamp(xPos + drift, 0, 0.95), 0.98)
 		})
 
 		tween:Play()
 		tween.Completed:Connect(function()
-			if snowflake and snowflake.Parent then
-				table.insert(snowflakePool, snowflake)
-				local idx = table.find(activeSnowflakes, snowflake)
-				if idx then
-					table.remove(activeSnowflakes, idx)
-				end
+			snowflake.Parent = snowflakeContainer
+			table.insert(snowflakePool, snowflake)
+			local idx = table.find(activeSnowflakes, snowflake)
+			if idx then
+				table.remove(activeSnowflakes, idx)
 			end
 		end)
 
@@ -982,7 +975,7 @@ function MacLib:Window(Settings)
 	local snowflakeSpawner = coroutine.create(function()
 		while not unloaded do
 			spawnSnowflake()
-			task.wait(0.1)
+			task.wait(0.15)
 		end
 	end)
 	coroutine.resume(snowflakeSpawner)
