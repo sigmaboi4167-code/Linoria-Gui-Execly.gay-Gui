@@ -912,9 +912,9 @@ function MacLib:Window(Settings)
 	snowflakeContainer.BackgroundTransparency = 1
 	snowflakeContainer.BorderSizePixel = 0
 	snowflakeContainer.Size = UDim2.fromScale(1, 1)
-	snowflakeContainer.ClipsDescendants = true
+	snowflakeContainer.ClipsDescendants = false
 	snowflakeContainer.Parent = base
-	snowflakeContainer.ZIndex = 1
+	snowflakeContainer.ZIndex = 10
 
 	local snowflakePool = {}
 	local activeSnowflakes = {}
@@ -922,17 +922,17 @@ function MacLib:Window(Settings)
 		count = 50,
 		minSpeed = 1.0,
 		maxSpeed = 3.0,
-		minSize = 2,
-		maxSize = 6,
-		opacityMin = 0.4,
-		opacityMax = 0.85
+		minSize = 3,
+		maxSize = 8,
+		opacityMin = 0.2,
+		opacityMax = 0.7
 	}
 
 	local function createSnowflake()
 		local snowflake = Instance.new("Frame")
 		snowflake.Name = "Snowflake"
 		snowflake.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-		snowflake.BackgroundTransparency = 0.3
+		snowflake.BackgroundTransparency = 0.1
 		snowflake.BorderSizePixel = 0
 		snowflake.Parent = snowflakeContainer
 		
@@ -952,12 +952,12 @@ function MacLib:Window(Settings)
 		local opacity = (snowflakeConfig.opacityMin + math.random(0, (snowflakeConfig.opacityMax - snowflakeConfig.opacityMin) * 100) / 100)
 
 		snowflake.Size = UDim2.fromOffset(size, size)
-		snowflake.Position = UDim2.fromScale(xPos, -0.02)
+		snowflake.Position = UDim2.fromScale(xPos, -0.05)
 		snowflake.BackgroundTransparency = opacity
 
 		local duration = (1.1 / speed) * 1.6
 		local tween = Tween(snowflake, TweenInfo.new(duration, Enum.EasingStyle.Linear), {
-			Position = UDim2.fromScale(math.clamp(xPos + drift, -0.02, 1.02), 1.02)
+			Position = UDim2.fromScale(math.clamp(xPos + drift, -0.1, 1.1), 1.1)
 		})
 
 		tween:Play()
