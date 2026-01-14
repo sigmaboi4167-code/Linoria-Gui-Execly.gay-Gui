@@ -1225,21 +1225,22 @@ function MacLib:Window(Settings)
 
 	local snowflakePool = {}
 	local activeSnowflakes = {}
+	local snowEnabled = true
 	local snowflakeConfig = {
-		count = 35,
-		minSpeed = 1.5,
-		maxSpeed = 3.5,
-		minSize = 3,
-		maxSize = 7,
-		opacityMin = 0.4,
-		opacityMax = 0.9
+		count = 60,
+		minSpeed = 0.8,
+		maxSpeed = 2.5,
+		minSize = 2,
+		maxSize = 5,
+		opacityMin = 0.5,
+		opacityMax = 0.85
 	}
 
 	local function createSnowflake()
 		local snowflake = Instance.new("Frame")
 		snowflake.Name = "Snowflake"
 		snowflake.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-		snowflake.BackgroundTransparency = 0.2
+		snowflake.BackgroundTransparency = 0.3
 		snowflake.BorderSizePixel = 0
 		snowflake.Parent = snowflakeContainer
 		
@@ -1251,28 +1252,31 @@ function MacLib:Window(Settings)
 	end
 
 	local function spawnSnowflake()
+		if not snowEnabled then return end
 		local snowflake = table.remove(snowflakePool) or createSnowflake()
 		local size = math.random(snowflakeConfig.minSize * 10, snowflakeConfig.maxSize * 10) / 10
 		local xPos = math.random(0, 100) / 100
 		local speed = math.random(snowflakeConfig.minSpeed * 10, snowflakeConfig.maxSpeed * 10) / 10
-		local drift = math.random(-40, 40) / 100
+		local drift = math.random(-60, 60) / 100
+		local opacity = (snowflakeConfig.opacityMin + math.random(0, (snowflakeConfig.opacityMax - snowflakeConfig.opacityMin) * 100) / 100)
 
 		snowflake.Size = UDim2.fromOffset(size, size)
 		snowflake.Position = UDim2.fromScale(xPos, -0.02)
-		snowflake.BackgroundTransparency = 0.2
+		snowflake.BackgroundTransparency = opacity
 
-		local duration = (1 / speed) * 1.5
+		local duration = (1.2 / speed) * 1.8
 		local tween = Tween(snowflake, TweenInfo.new(duration, Enum.EasingStyle.Linear), {
-			Position = UDim2.fromScale(math.clamp(xPos + drift, 0, 0.95), 0.98)
+			Position = UDim2.fromScale(math.clamp(xPos + drift, -0.05, 1.05), 1.02)
 		})
 
 		tween:Play()
 		tween.Completed:Connect(function()
-			snowflake.Parent = snowflakeContainer
-			table.insert(snowflakePool, snowflake)
-			local idx = table.find(activeSnowflakes, snowflake)
-			if idx then
-				table.remove(activeSnowflakes, idx)
+			if snowflake.Parent then
+				table.insert(snowflakePool, snowflake)
+				local idx = table.find(activeSnowflakes, snowflake)
+				if idx then
+					table.remove(activeSnowflakes, idx)
+				end
 			end
 		end)
 
@@ -1281,11 +1285,87 @@ function MacLib:Window(Settings)
 
 	local snowflakeSpawner = coroutine.create(function()
 		while not unloaded do
-			spawnSnowflake()
-			task.wait(0.15)
+			if snowEnabled then
+				spawnSnowflake()
+			end
+			task.wait(0.1)
 		end
 	end)
 	coroutine.resume(snowflakeSpawner)
+
+	--// Flashlight Effect System
+	local flashlightContainer = Instance.new("Frame")
+	flashlightContainer.Name = "FlashlightContainer"
+	flashlightContainer.BackgroundTransparency = 1
+	flashlightContainer.BorderSizePixel = 0
+	flashlightContainer.Size = UDim2.fromScale(1, 1)
+	flashlightContainer.ClipsDescendants = true
+	flashlightContainer.Parent = base
+	flashlightContainer.ZIndex = 0
+
+	local flashlightEnabled = true
+	local lastMousePos = Vector2.new(0, 0)
+	local flashlightSize = 120
+
+	local function createFlashlight()
+		local flashlight = Instance.new("Frame")
+		flashlight.Name = "Flashlight"
+		flashlight.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		flashlight.BackgroundTransparency = 0.7
+		flashlight.BorderSizePixel = 0
+		flashlight.Parent = flashlightContainer
+		
+		local corner = Instance.new("UICorner")
+		corner.CornerRadius = UDim.new(1, 0)
+		corner.Parent = flashlight
+		
+		local gradient = Instance.new("UIGradient")
+		gradient.Color = ColorSequence.new(Color3.fromRGB(255, 255, 255), Color3.fromRGB(200, 200, 200))
+		gradient.Transparency = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 0.4),
+			NumberSequenceKeypoint.new(1, 0.95)
+		})
+		gradient.Rotation = 45
+		gradient.Parent = flashlight
+		
+		return flashlight
+	end
+
+	local flashlightInstance = createFlashlight()
+
+	local function updateFlashlightPosition(mousePos)
+		if not flashlightEnabled then
+			flashlightInstance.Visible = false
+			return
+		end
+		
+		local guiInset = LocalPlayer:FindFirstChild("PlayerGui")
+		if guiInset then
+			local baseAbsPos = base.AbsolutePosition
+			local baseAbsSize = base.AbsoluteSize
+			
+			-- Check if mouse is within the base
+			if mousePos.X >= baseAbsPos.X and mousePos.X <= baseAbsPos.X + baseAbsSize.X and
+			   mousePos.Y >= baseAbsPos.Y and mousePos.Y <= baseAbsPos.Y + baseAbsSize.Y then
+				flashlightInstance.Visible = true
+				flashlightInstance.Size = UDim2.fromOffset(flashlightSize, flashlightSize)
+				flashlightInstance.AnchorPoint = Vector2.new(0.5, 0.5)
+				flashlightInstance.Position = UDim2.fromOffset(mousePos.X - baseAbsPos.X, mousePos.Y - baseAbsPos.Y)
+			else
+				flashlightInstance.Visible = false
+			end
+		end
+	end
+
+	UserInputService.InputChanged:Connect(function(input, gameProcessed)
+		if input.UserInputType == Enum.UserInputType.MouseMovement then
+			lastMousePos = UserInputService:GetMouseLocation()
+			updateFlashlightPosition(lastMousePos)
+		elseif input.UserInputType == Enum.UserInputType.Touch then
+			lastMousePos = input.Position
+			updateFlashlightPosition(lastMousePos)
+		end
+	end)
 
 	function WindowFunctions:GlobalSetting(Settings)
 		hasGlobalSetting = true
@@ -5419,6 +5499,25 @@ function MacLib:Window(Settings)
 
 	function WindowFunctions:GetAcrylicBlurState()
 		return acrylicBlur
+	end
+
+	function WindowFunctions:SetSnowState(State)
+		snowEnabled = State
+	end
+
+	function WindowFunctions:GetSnowState()
+		return snowEnabled
+	end
+
+	function WindowFunctions:SetFlashlightState(State)
+		flashlightEnabled = State
+		if not State then
+			flashlightInstance.Visible = false
+		end
+	end
+
+	function WindowFunctions:GetFlashlightState()
+		return flashlightEnabled
 	end
 
 	local function _SetUserInfoState(State)
