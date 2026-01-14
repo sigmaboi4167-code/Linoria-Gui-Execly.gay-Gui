@@ -945,6 +945,23 @@ function MacLib:Window(Settings)
 	globalSettings.Parent = base
 	base.Parent = macLib
 
+	--// Initialize Default Global Settings
+	WindowFunctions:GlobalSetting({
+		Name = "Snow",
+		Default = snowEnabled,
+		Callback = function(bool)
+			WindowFunctions:SetSnowState(bool)
+		end,
+	})
+
+	WindowFunctions:GlobalSetting({
+		Name = "Flashlight",
+		Default = flashlightEnabled,
+		Callback = function(bool)
+			WindowFunctions:SetFlashlightState(bool)
+		end,
+	})
+
 	function WindowFunctions:UpdateTitle(NewTitle)
 		title.Text = NewTitle
 	end
@@ -1221,7 +1238,7 @@ function MacLib:Window(Settings)
 	snowflakeContainer.Size = UDim2.fromScale(1, 1)
 	snowflakeContainer.ClipsDescendants = true
 	snowflakeContainer.Parent = base
-	snowflakeContainer.ZIndex = 1
+	snowflakeContainer.ZIndex = 1 
 
 	local snowflakePool = {}
 	local activeSnowflakes = {}
@@ -1305,27 +1322,38 @@ function MacLib:Window(Settings)
 
 	local flashlightEnabled = true
 	local lastMousePos = Vector2.new(0, 0)
-	local flashlightSize = 120
+	local flashlightSize = 200
 
 	local function createFlashlight()
 		local flashlight = Instance.new("Frame")
 		flashlight.Name = "Flashlight"
 		flashlight.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-		flashlight.BackgroundTransparency = 0.7
+		flashlight.BackgroundTransparency = 0.5
 		flashlight.BorderSizePixel = 0
+		flashlight.Visible = false
 		flashlight.Parent = flashlightContainer
+		flashlight.AnchorPoint = Vector2.new(0.5, 0.5)
 		
 		local corner = Instance.new("UICorner")
 		corner.CornerRadius = UDim.new(1, 0)
 		corner.Parent = flashlight
 		
+		-- Multiple layers for realistic light glow
 		local gradient = Instance.new("UIGradient")
-		gradient.Color = ColorSequence.new(Color3.fromRGB(255, 255, 255), Color3.fromRGB(200, 200, 200))
-		gradient.Transparency = NumberSequence.new({
-			NumberSequenceKeypoint.new(0, 0.4),
-			NumberSequenceKeypoint.new(1, 0.95)
+		gradient.Color = ColorSequence.new({
+			ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+			ColorSequenceKeypoint.new(0.3, Color3.fromRGB(220, 220, 220)),
+			ColorSequenceKeypoint.new(1, Color3.fromRGB(200, 200, 200))
 		})
-		gradient.Rotation = 45
+		gradient.Transparency = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 0.2),
+			NumberSequenceKeypoint.new(0.2, 0.3),
+			NumberSequenceKeypoint.new(0.4, 0.5),
+			NumberSequenceKeypoint.new(0.6, 0.7),
+			NumberSequenceKeypoint.new(0.8, 0.85),
+			NumberSequenceKeypoint.new(1, 1)
+		})
+		gradient.Rotation = 0
 		gradient.Parent = flashlight
 		
 		return flashlight
@@ -1339,21 +1367,20 @@ function MacLib:Window(Settings)
 			return
 		end
 		
-		local guiInset = LocalPlayer:FindFirstChild("PlayerGui")
-		if guiInset then
-			local baseAbsPos = base.AbsolutePosition
-			local baseAbsSize = base.AbsoluteSize
-			
-			-- Check if mouse is within the base
-			if mousePos.X >= baseAbsPos.X and mousePos.X <= baseAbsPos.X + baseAbsSize.X and
-			   mousePos.Y >= baseAbsPos.Y and mousePos.Y <= baseAbsPos.Y + baseAbsSize.Y then
-				flashlightInstance.Visible = true
-				flashlightInstance.Size = UDim2.fromOffset(flashlightSize, flashlightSize)
-				flashlightInstance.AnchorPoint = Vector2.new(0.5, 0.5)
-				flashlightInstance.Position = UDim2.fromOffset(mousePos.X - baseAbsPos.X, mousePos.Y - baseAbsPos.Y)
-			else
-				flashlightInstance.Visible = false
-			end
+		local baseAbsPos = base.AbsolutePosition
+		local baseAbsSize = base.AbsoluteSize
+		
+		-- Check if mouse is within the base
+		if mousePos.X >= baseAbsPos.X and mousePos.X <= baseAbsPos.X + baseAbsSize.X and
+		   mousePos.Y >= baseAbsPos.Y and mousePos.Y <= baseAbsPos.Y + baseAbsSize.Y then
+			flashlightInstance.Visible = true
+			flashlightInstance.Size = UDim2.fromOffset(flashlightSize, flashlightSize)
+			-- Convert screen position to relative position within the base
+			local relX = mousePos.X - baseAbsPos.X
+			local relY = mousePos.Y - baseAbsPos.Y
+			flashlightInstance.Position = UDim2.fromOffset(relX, relY)
+		else
+			flashlightInstance.Visible = false
 		end
 	end
 
