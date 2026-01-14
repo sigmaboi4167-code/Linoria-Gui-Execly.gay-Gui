@@ -919,20 +919,20 @@ function MacLib:Window(Settings)
 	local snowflakePool = {}
 	local activeSnowflakes = {}
 	local snowflakeConfig = {
-		count = 60,
-		minSpeed = 0.8,
-		maxSpeed = 2.5,
-		minSize = 2,
-		maxSize = 6,
-		opacityMin = 0.3,
-		opacityMax = 0.8
+		count = 120,
+		minSpeed = 3.0,
+		maxSpeed = 5.5,
+		minSize = 1.5,
+		maxSize = 4,
+		opacityMin = 0.25,
+		opacityMax = 0.75
 	}
 
 	local function createSnowflake()
 		local snowflake = Instance.new("Frame")
 		snowflake.Name = "Snowflake"
 		snowflake.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-		snowflake.BackgroundTransparency = 0.15
+		snowflake.BackgroundTransparency = 0.2
 		snowflake.BorderSizePixel = 0
 		snowflake.Parent = snowflakeContainer
 		
@@ -946,27 +946,28 @@ function MacLib:Window(Settings)
 	local function spawnSnowflake()
 		local snowflake = table.remove(snowflakePool) or createSnowflake()
 		local size = math.random(snowflakeConfig.minSize * 10, snowflakeConfig.maxSize * 10) / 10
-		local xPos = math.random(0, 100) / 100
+		local xPos = math.random(0, 1000) / 1000
 		local speed = math.random(snowflakeConfig.minSpeed * 10, snowflakeConfig.maxSpeed * 10) / 10
-		local drift = math.random(-60, 60) / 100
+		local drift = (math.random(-100, 100) / 1000)
 		local randomOpacity = (snowflakeConfig.opacityMin + math.random(0, (snowflakeConfig.opacityMax - snowflakeConfig.opacityMin) * 100) / 100)
 
 		snowflake.Size = UDim2.fromOffset(size, size)
-		snowflake.Position = UDim2.fromScale(xPos, -0.05)
+		snowflake.Position = UDim2.fromScale(xPos, -0.1)
 		snowflake.BackgroundTransparency = randomOpacity
 
-		local duration = (1.2 / speed) * 1.8
+		local duration = (3.5 / speed) * 2.5
 		local tween = Tween(snowflake, TweenInfo.new(duration, Enum.EasingStyle.Linear), {
-			Position = UDim2.fromScale(math.clamp(xPos + drift, -0.05, 1.05), 1.02)
+			Position = UDim2.fromScale(math.clamp(xPos + drift, -0.1, 1.1), 1.1)
 		})
 
 		tween:Play()
 		tween.Completed:Connect(function()
-			snowflake.Parent = snowflakeContainer
-			table.insert(snowflakePool, snowflake)
-			local idx = table.find(activeSnowflakes, snowflake)
-			if idx then
-				table.remove(activeSnowflakes, idx)
+			if snowflake and snowflake.Parent then
+				table.insert(snowflakePool, snowflake)
+				local idx = table.find(activeSnowflakes, snowflake)
+				if idx then
+					table.remove(activeSnowflakes, idx)
+				end
 			end
 		end)
 
@@ -976,12 +977,12 @@ function MacLib:Window(Settings)
 	local snowflakeSpawner = coroutine.create(function()
 		while not unloaded do
 			spawnSnowflake()
-			task.wait(0.08)
+			task.wait(0.04)
 		end
 	end)
 	
 	-- Spawn initial batch of snowflakes
-	for i = 1, 10 do
+	for i = 1, 30 do
 		spawnSnowflake()
 	end
 	
