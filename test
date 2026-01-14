@@ -945,23 +945,6 @@ function MacLib:Window(Settings)
 	globalSettings.Parent = base
 	base.Parent = macLib
 
-	--// Initialize Default Global Settings
-	WindowFunctions:GlobalSetting({
-		Name = "Snow",
-		Default = snowEnabled,
-		Callback = function(bool)
-			WindowFunctions:SetSnowState(bool)
-		end,
-	})
-
-	WindowFunctions:GlobalSetting({
-		Name = "Flashlight",
-		Default = flashlightEnabled,
-		Callback = function(bool)
-			WindowFunctions:SetFlashlightState(bool)
-		end,
-	})
-
 	function WindowFunctions:UpdateTitle(NewTitle)
 		title.Text = NewTitle
 	end
@@ -1310,90 +1293,6 @@ function MacLib:Window(Settings)
 	end)
 	coroutine.resume(snowflakeSpawner)
 
-	--// Flashlight Effect System
-	local flashlightContainer = Instance.new("Frame")
-	flashlightContainer.Name = "FlashlightContainer"
-	flashlightContainer.BackgroundTransparency = 1
-	flashlightContainer.BorderSizePixel = 0
-	flashlightContainer.Size = UDim2.fromScale(1, 1)
-	flashlightContainer.ClipsDescendants = true
-	flashlightContainer.Parent = base
-	flashlightContainer.ZIndex = 0
-
-	local flashlightEnabled = true
-	local lastMousePos = Vector2.new(0, 0)
-	local flashlightSize = 200
-
-	local function createFlashlight()
-		local flashlight = Instance.new("Frame")
-		flashlight.Name = "Flashlight"
-		flashlight.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-		flashlight.BackgroundTransparency = 0.5
-		flashlight.BorderSizePixel = 0
-		flashlight.Visible = false
-		flashlight.Parent = flashlightContainer
-		flashlight.AnchorPoint = Vector2.new(0.5, 0.5)
-		
-		local corner = Instance.new("UICorner")
-		corner.CornerRadius = UDim.new(1, 0)
-		corner.Parent = flashlight
-		
-		-- Multiple layers for realistic light glow
-		local gradient = Instance.new("UIGradient")
-		gradient.Color = ColorSequence.new({
-			ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
-			ColorSequenceKeypoint.new(0.3, Color3.fromRGB(220, 220, 220)),
-			ColorSequenceKeypoint.new(1, Color3.fromRGB(200, 200, 200))
-		})
-		gradient.Transparency = NumberSequence.new({
-			NumberSequenceKeypoint.new(0, 0.2),
-			NumberSequenceKeypoint.new(0.2, 0.3),
-			NumberSequenceKeypoint.new(0.4, 0.5),
-			NumberSequenceKeypoint.new(0.6, 0.7),
-			NumberSequenceKeypoint.new(0.8, 0.85),
-			NumberSequenceKeypoint.new(1, 1)
-		})
-		gradient.Rotation = 0
-		gradient.Parent = flashlight
-		
-		return flashlight
-	end
-
-	local flashlightInstance = createFlashlight()
-
-	local function updateFlashlightPosition(mousePos)
-		if not flashlightEnabled then
-			flashlightInstance.Visible = false
-			return
-		end
-		
-		local baseAbsPos = base.AbsolutePosition
-		local baseAbsSize = base.AbsoluteSize
-		
-		-- Check if mouse is within the base
-		if mousePos.X >= baseAbsPos.X and mousePos.X <= baseAbsPos.X + baseAbsSize.X and
-		   mousePos.Y >= baseAbsPos.Y and mousePos.Y <= baseAbsPos.Y + baseAbsSize.Y then
-			flashlightInstance.Visible = true
-			flashlightInstance.Size = UDim2.fromOffset(flashlightSize, flashlightSize)
-			-- Convert screen position to relative position within the base
-			local relX = mousePos.X - baseAbsPos.X
-			local relY = mousePos.Y - baseAbsPos.Y
-			flashlightInstance.Position = UDim2.fromOffset(relX, relY)
-		else
-			flashlightInstance.Visible = false
-		end
-	end
-
-	UserInputService.InputChanged:Connect(function(input, gameProcessed)
-		if input.UserInputType == Enum.UserInputType.MouseMovement then
-			lastMousePos = UserInputService:GetMouseLocation()
-			updateFlashlightPosition(lastMousePos)
-		elseif input.UserInputType == Enum.UserInputType.Touch then
-			lastMousePos = input.Position
-			updateFlashlightPosition(lastMousePos)
-		end
-	end)
-
 	function WindowFunctions:GlobalSetting(Settings)
 		hasGlobalSetting = true
 		local GlobalSettingFunctions = {}
@@ -1539,6 +1438,15 @@ function MacLib:Window(Settings)
 
 		return GlobalSettingFunctions
 	end
+
+	--// Initialize Default Global Settings
+	WindowFunctions:GlobalSetting({
+		Name = "Snow",
+		Default = snowEnabled,
+		Callback = function(bool)
+			WindowFunctions:SetSnowState(bool)
+		end,
+	})
 
 	function WindowFunctions:TabGroup()
 		local SectionFunctions = {}
@@ -5534,17 +5442,6 @@ function MacLib:Window(Settings)
 
 	function WindowFunctions:GetSnowState()
 		return snowEnabled
-	end
-
-	function WindowFunctions:SetFlashlightState(State)
-		flashlightEnabled = State
-		if not State then
-			flashlightInstance.Visible = false
-		end
-	end
-
-	function WindowFunctions:GetFlashlightState()
-		return flashlightEnabled
 	end
 
 	local function _SetUserInfoState(State)
