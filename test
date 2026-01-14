@@ -1213,86 +1213,6 @@ function MacLib:Window(Settings)
 
 	RunService.RenderStepped:Connect(UpdateOrientation)
 
-	--// Snowflake Animation System
-	local snowflakeContainer = Instance.new("Frame")
-	snowflakeContainer.Name = "SnowflakeContainer"
-	snowflakeContainer.BackgroundTransparency = 1
-	snowflakeContainer.BorderSizePixel = 0
-	snowflakeContainer.Size = UDim2.fromScale(1, 1)
-	snowflakeContainer.ClipsDescendants = true
-	snowflakeContainer.Parent = base
-	snowflakeContainer.ZIndex = 1 
-
-	local snowflakePool = {}
-	local activeSnowflakes = {}
-	local snowEnabled = true
-	local snowflakeConfig = {
-		count = 60,
-		minSpeed = 0.8,
-		maxSpeed = 2.5,
-		minSize = 2,
-		maxSize = 5,
-		opacityMin = 0.5,
-		opacityMax = 0.85
-	}
-
-	local function createSnowflake()
-		local snowflake = Instance.new("Frame")
-		snowflake.Name = "Snowflake"
-		snowflake.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-		snowflake.BackgroundTransparency = 0.3
-		snowflake.BorderSizePixel = 0
-		snowflake.Parent = snowflakeContainer
-		
-		local corner = Instance.new("UICorner")
-		corner.CornerRadius = UDim.new(1, 0)
-		corner.Parent = snowflake
-		
-		return snowflake
-	end
-
-	local function spawnSnowflake()
-		if not snowEnabled then return end
-		local snowflake = table.remove(snowflakePool) or createSnowflake()
-		local size = math.random(snowflakeConfig.minSize * 10, snowflakeConfig.maxSize * 10) / 10
-		local xPos = math.random(0, 100) / 100
-		local speed = math.random(snowflakeConfig.minSpeed * 10, snowflakeConfig.maxSpeed * 10) / 10
-		local drift = math.random(-60, 60) / 100
-		local opacity = (snowflakeConfig.opacityMin + math.random(0, (snowflakeConfig.opacityMax - snowflakeConfig.opacityMin) * 100) / 100)
-
-		snowflake.Size = UDim2.fromOffset(size, size)
-		snowflake.Position = UDim2.fromScale(xPos, -0.02)
-		snowflake.BackgroundTransparency = opacity
-
-		local duration = (1.2 / speed) * 1.8
-		local tween = Tween(snowflake, TweenInfo.new(duration, Enum.EasingStyle.Linear), {
-			Position = UDim2.fromScale(math.clamp(xPos + drift, -0.05, 1.05), 1.02)
-		})
-
-		tween:Play()
-		tween.Completed:Connect(function()
-			if snowflake.Parent then
-				table.insert(snowflakePool, snowflake)
-				local idx = table.find(activeSnowflakes, snowflake)
-				if idx then
-					table.remove(activeSnowflakes, idx)
-				end
-			end
-		end)
-
-		table.insert(activeSnowflakes, snowflake)
-	end
-
-	local snowflakeSpawner = coroutine.create(function()
-		while not unloaded do
-			if snowEnabled then
-				spawnSnowflake()
-			end
-			task.wait(0.1)
-		end
-	end)
-	coroutine.resume(snowflakeSpawner)
-
 	function WindowFunctions:GlobalSetting(Settings)
 		hasGlobalSetting = true
 		local GlobalSettingFunctions = {}
@@ -1438,15 +1358,6 @@ function MacLib:Window(Settings)
 
 		return GlobalSettingFunctions
 	end
-
-	--// Initialize Default Global Settings
-	WindowFunctions:GlobalSetting({
-		Name = "Snow",
-		Default = snowEnabled,
-		Callback = function(bool)
-			WindowFunctions:SetSnowState(bool)
-		end,
-	})
 
 	function WindowFunctions:TabGroup()
 		local SectionFunctions = {}
@@ -5434,14 +5345,6 @@ function MacLib:Window(Settings)
 
 	function WindowFunctions:GetAcrylicBlurState()
 		return acrylicBlur
-	end
-
-	function WindowFunctions:SetSnowState(State)
-		snowEnabled = State
-	end
-
-	function WindowFunctions:GetSnowState()
-		return snowEnabled
 	end
 
 	local function _SetUserInfoState(State)
