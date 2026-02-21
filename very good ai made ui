@@ -1163,7 +1163,7 @@ local proggyAsset = Fonts:Register_Font("ProggyClean", 400, "normal", {
 })
 
 -- Apply the font
-Fonts.ProggyTiny = Font.new(proggyAsset)s
+Fonts.ProggyTiny = Font.new(proggyAsset)
 local Keybinds = CloneScreenGui
 local Background = Instance.new("Frame", Keybinds)
 local Gradient = Instance.new("Frame", Background)
