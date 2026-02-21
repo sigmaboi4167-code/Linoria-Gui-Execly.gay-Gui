@@ -1372,6 +1372,112 @@ end)
 return Watermark
 end
 
+-- Create Status Bar at Bottom
+local function createStatusBar()
+    local statusGui = CloneScreenGui
+    local statusFrame = Instance.new("Frame", statusGui)
+    local statusLabel = Instance.new("TextLabel", statusFrame)
+    
+    statusFrame.Name = "StatusBar"
+    statusFrame.BackgroundColor3 = Color3.fromRGB(11, 11, 11)
+    statusFrame.BorderColor3 = Color3.fromRGB(147, 112, 219)
+    statusFrame.BorderSizePixel = 1
+    statusFrame.Position = UDim2.new(0, 0, 1, -20)
+    statusFrame.Size = UDim2.new(1, 0, 0, 20)
+    statusFrame.ZIndex = 50
+    
+    -- Add gradient effect to status bar
+    local statusGradient = Instance.new("UIGradient", statusFrame)
+    statusGradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0.00, Color3.fromRGB(20, 20, 20)),
+        ColorSequenceKeypoint.new(0.50, Color3.fromRGB(15, 15, 15)),
+        ColorSequenceKeypoint.new(1.00, Color3.fromRGB(20, 20, 20))
+    }
+    statusGradient.Rotation = 90
+    
+    statusLabel.BackgroundTransparency = 1
+    statusLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+    statusLabel.TextSize = 9
+    statusLabel.FontFace = Fonts.ProggyTiny
+    statusLabel.Text = "discord.gg/Unknown.client"
+    statusLabel.Size = UDim2.new(1, 0, 1, 0)
+    statusLabel.TextXAlignment = Enum.TextXAlignment.Center
+    statusLabel.TextYAlignment = Enum.TextYAlignment.Center
+    statusLabel.RichText = true
+    statusLabel.TextStrokeTransparency = 0
+    
+    return statusFrame
+end
+
+-- Create Snowfall Particle System
+local function createSnowfall()
+    local snowGui = CloneScreenGui
+    snowGui.Name = "SnowfallOverlay"
+    snowGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    
+    local snowContainer = Instance.new("Frame", snowGui)
+    snowContainer.Name = "SnowContainer"
+    snowContainer.BackgroundTransparency = 1
+    snowContainer.Size = UDim2.new(1, 0, 1, 0)
+    snowContainer.ZIndex = 1
+    
+    local snowParticles = {}
+    local particleCount = 60
+    
+    for i = 1, particleCount do
+        local particle = Instance.new("Frame", snowContainer)
+        particle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        particle.BorderSizePixel = 0
+        particle.Size = UDim2.new(0, math.random(2, 5), 0, math.random(2, 5))
+        particle.Position = UDim2.new(math.random(0, 100) / 100, 0, math.random(-10, 0) / 10, 0)
+        particle.BackgroundTransparency = math.random(40, 80) / 100
+        
+        -- Add corner radius for softer appearance
+        local corner = Instance.new("UICorner", particle)
+        corner.CornerRadius = UDim.new(1, 0)
+        
+        -- Glow effect for particles
+        local glow = Instance.new("UIStroke", particle)
+        glow.Color = Color3.fromRGB(255, 255, 255)
+        glow.Thickness = 0.5
+        glow.Transparency = 0.7
+        
+        table.insert(snowParticles, {
+            frame = particle,
+            speed = math.random(10, 30) / 100,
+            sway = math.random(-5, 5) / 100,
+            yPos = math.random(-10, 0) / 10
+        })
+    end
+    
+    -- Animate snowfall
+    task.spawn(function()
+        while true do
+            task.wait(0.03)
+            for _, particle in ipairs(snowParticles) do
+                particle.yPos = particle.yPos + particle.speed
+                local xPos = particle.frame.Position.X.Scale + particle.sway
+                
+                if particle.yPos > 1.1 then
+                    particle.yPos = -0.1
+                    particle.frame.Position = UDim2.new(math.random(0, 100) / 100, 0, -0.1, 0)
+                else
+                    particle.frame.Position = UDim2.new(xPos, 0, particle.yPos, 0)
+                end
+                
+                -- Vary opacity
+                local opacity = math.sin(particle.yPos * 6.28) * 0.2 + 0.5
+                particle.frame.BackgroundTransparency = 0.6 + (opacity * 0.2)
+            end
+        end
+    end)
+    
+    return snowGui
+end
+
+local statusBar = createStatusBar()
+local snowfall = createSnowfall()
+
 local library = {
 Title = 'Unknown.client<font color="rgb(74, 74, 74)"></font> | Private',
 keybind = Enum.KeyCode.RightBracket,
@@ -1426,6 +1532,31 @@ local keynames = {
 menu.BG.Position = UDim2.new(0.5,-menu.BG.Size.X.Offset/2,0.5,-menu.BG.Size.Y.Offset/2)
 menu.Parent = CloneCore
 menu.Name = "Unknown.client_gui"
+
+-- Add beveled/inset ridge border effect
+local bevOuter = Instance.new("UIStroke", menu.BG)
+bevOuter.Color = Color3.fromRGB(50, 40, 70)
+bevOuter.Thickness = 2
+bevOuter.Transparency = 0.3
+
+local bevCorner = Instance.new("UICorner", menu.BG)
+bevCorner.CornerRadius = UDim.new(0, 4)
+
+-- Add subtle inner glow
+local bevInner = Instance.new("UIStroke", menu.BG)
+bevInner.Color = Color3.fromRGB(180, 160, 200)
+bevInner.Thickness = 0.5
+bevInner.Transparency = 0.7
+
+-- Add glassmorphism background blur effect (visual enhancement)
+menu.BG.BackgroundTransparency = 0.05
+local bgGradient = Instance.new("UIGradient", menu.BG)
+bgGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0.00, Color3.fromRGB(18, 18, 25)),
+    ColorSequenceKeypoint.new(0.50, Color3.fromRGB(14, 14, 20)),
+    ColorSequenceKeypoint.new(1.00, Color3.fromRGB(18, 18, 25))
+}
+bgGradient.Rotation = 45
 local ProtectGui = protectgui or (syn and syn.protect_gui) or (function() end)
 local CloneScreenGui = cloneref(Instance.new("ScreenGui"))
 ProtectGui(CloneScreenGui)   
@@ -1692,12 +1823,24 @@ end
                     mid.BorderColor3 = Color3.fromRGB(25,25,25)
                     mid.BorderSizePixel = 2
                     mid.Size = UDim2.new(0, 12, 0, 12)
+                    
+                    -- Add glow to mid frame
+                    local midGlowStroke = Instance.new("UIStroke", mid)
+                    midGlowStroke.Color = library.Colors.libColor
+                    midGlowStroke.Thickness = 0.5
+                    midGlowStroke.Transparency = 0.8
+                    
+                    local midCorner = Instance.new("UICorner", mid)
+                    midCorner.CornerRadius = UDim.new(0, 2)
 
                     front.Name = "front"
                     front.Parent = mid
                     front.BackgroundColor3 = Color3.fromRGB(21,21,21)
                     front.BorderColor3 = Color3.fromRGB(25, 25, 25)
                     front.Size = UDim2.new(0, 12, 0, 12)
+                    
+                    local frontCorner = Instance.new("UICorner", front)
+                    frontCorner.CornerRadius = UDim.new(0, 2)
 
                     text.Name = "text"
                     text.Parent = toggleframe
@@ -1796,6 +1939,14 @@ end
                     keybind.Visible = true
                     keybind.Position = UDim2.new(0.82, 4, 0.15, 0)
                     keybind.Size = UDim2.new(0, 30, 0, 13)
+                    
+                    local keybindCorner = Instance.new("UICorner", keybind)
+                    keybindCorner.CornerRadius = UDim.new(0, 2)
+                    
+                    local keybindGlow = Instance.new("UIStroke", keybind)
+                    keybindGlow.Color = library.Colors.libColor
+                    keybindGlow.Thickness = 0.5
+                    keybindGlow.Transparency = 0.8
 
                     button.Parent = keybind
                     button.BackgroundColor3 = Color3.fromRGB(19, 19, 19)
@@ -1917,6 +2068,14 @@ end
                         colorpicker.BorderSizePixel = 3
                         colorpicker.Position = args.second and UDim2.new(0.720000029, 4, 0.272000015, 0) or UDim2.new(0.860000014, 4, 0.272000015, 0)
                         colorpicker.Size = UDim2.new(0, 20, 0, 10)
+                        
+                        local colorPickerCorner = Instance.new("UICorner", colorpicker)
+                        colorPickerCorner.CornerRadius = UDim.new(0, 2)
+                        
+                        local colorPickerGlow = Instance.new("UIStroke", colorpicker)
+                        colorPickerGlow.Color = library.Colors.libColor
+                        colorPickerGlow.Thickness = 0.5
+                        colorPickerGlow.Transparency = 0.7
 
                         mid.Name = "mid"
                         mid.Parent = colorpicker
@@ -1954,13 +2113,14 @@ end
                         colorFrame.BorderSizePixel = 2
                         colorFrame.Position = UDim2.new(0.101092957, 0, 0.75, 0)
                         colorFrame.Size = UDim2.new(0, 187, 0, 178)
-
-                        colorFrame_2.Name = "colorFrame"
-                        colorFrame_2.Parent = colorFrame
-                        colorFrame_2.BackgroundColor3 = Color3.fromRGB(15,15,15)
-                        colorFrame_2.BorderColor3 = Color3.fromRGB(30, 30, 30)
-                        colorFrame_2.Size = UDim2.new(1, 0, 1, 0)
-
+                    
+                    local colorFrameCorner = Instance.new("UICorner", colorFrame)
+                    colorFrameCorner.CornerRadius = UDim.new(0, 4)
+                    
+                    local colorFrameGlow = Instance.new("UIStroke", colorFrame)
+                    colorFrameGlow.Color = library.Colors.libColor
+                    colorFrameGlow.Thickness = 1
+                    colorFrameGlow.Transparency = 0.6
                         hueframe.Name = "hueframe"
                         hueframe.Parent = colorFrame_2
                         hueframe.BackgroundColor3 = Color3.fromRGB(15,15,15)
@@ -2159,6 +2319,14 @@ end
                     BG.BorderSizePixel = 2
                     BG.Position = UDim2.new(0.02, -1, 0.12, 0)
                     BG.Size = UDim2.new(0, 240, 0, 12)
+                    
+                    local btnCorner = Instance.new("UICorner", BG)
+                    btnCorner.CornerRadius = UDim.new(0, 4)
+                    
+                    local btnGlow = Instance.new("UIStroke", BG)
+                    btnGlow.Color = library.Colors.libColor
+                    btnGlow.Thickness = 0.5
+                    btnGlow.Transparency = 0.9
 
                     main.Name = "main"
                     main.Parent = BG
@@ -2223,13 +2391,14 @@ end
                 BG.BorderSizePixel = 2
                 BG.Position = UDim2.new(0.02, -1, 0, 15)
                 BG.Size = UDim2.new(0, 240, 0, 12)
-
-                main.Name = "main"
-                main.Parent = BG
-                main.BackgroundColor3 = Color3.fromRGB(19, 19, 19)
-                main.BorderColor3 = Color3.fromRGB(20, 20, 20)
-                main.Size = UDim2.new(1, 0, 1, 0)
-
+                    
+                    local sliderCorner = Instance.new("UICorner", BG)
+                    sliderCorner.CornerRadius = UDim.new(0, 4)
+                    
+                    local sliderGlow = Instance.new("UIStroke", BG)
+                    sliderGlow.Color = library.Colors.libColor
+                    sliderGlow.Thickness = 0.5
+                    sliderGlow.Transparency = 0.9
                 fill.Name = "fill"
                 fill.Parent = main
                 fill.BackgroundColor3 = library.Colors.libColor
@@ -2237,6 +2406,16 @@ end
                 fill.BorderColor3 = Color3.fromRGB(60, 60, 60)
                 fill.BorderSizePixel = 0
                 fill.Size = UDim2.new(0.617238641, 13, 1, 0)
+                
+                -- Add glow effect to slider fill
+                local fillStroke = Instance.new("UIStroke", fill)
+                fillStroke.Color = library.Colors.libColor
+                fillStroke.Thickness = 1
+                fillStroke.Transparency = 0.5
+                
+                local fillCorner = Instance.new("UICorner", fill)
+                fillCorner.CornerRadius = UDim.new(0, 2)
+                
                 if args.min < 0 then
                     fill.Position = UDim2.new(0.5,0,0,0)
                 end
@@ -2430,6 +2609,14 @@ end
                     BG.BorderSizePixel = 2
                     BG.Position = UDim2.new(0.02, -1, 0, 16)
                     BG.Size = UDim2.new(0, 240, 0, 15)
+                    
+                    local textboxCorner = Instance.new("UICorner", BG)
+                    textboxCorner.CornerRadius = UDim.new(0, 4)
+                    
+                    local textboxGlow = Instance.new("UIStroke", BG)
+                    textboxGlow.Color = library.Colors.libColor
+                    textboxGlow.Thickness = 0.5
+                    textboxGlow.Transparency = 0.9
 
                     main.Name = "main"
                     main.Parent = BG
@@ -2475,6 +2662,7 @@ end
                     local div = Instance.new("Frame")
                     local BG = Instance.new("Frame")
                     local main = Instance.new("Frame")
+                    local innerLine = Instance.new("Frame")
 
                     div.Name = "div"
                     div.Parent = grouper
@@ -2488,15 +2676,23 @@ end
                     BG.Parent = div
                     BG.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
                     BG.BorderColor3 = Color3.fromRGB(0, 0, 0)
-                    BG.BorderSizePixel = 2
+                    BG.BorderSizePixel = 0
                     BG.Position = UDim2.new(0.02, 0, 0, 4)
-                    BG.Size = UDim2.new(0, 191, 0, 1)
+                    BG.Size = UDim2.new(0, 191, 0, 2)
 
                     main.Name = "main"
                     main.Parent = BG
-                    main.BackgroundColor3 = Color3.fromRGB(19, 19, 19)
+                    main.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
                     main.BorderColor3 = Color3.fromRGB(40, 40, 40)
-                    main.Size = UDim2.new(0, 191, 0, 1)
+                    main.BorderSizePixel = 0
+                    main.Size = UDim2.new(1, 0, 0, 1)
+
+                    innerLine.Name = "innerLine"
+                    innerLine.Parent = BG
+                    innerLine.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+                    innerLine.BorderSizePixel = 0
+                    innerLine.Position = UDim2.new(0, 0, 0, 1)
+                    innerLine.Size = UDim2.new(1, 0, 0, 1)
                 end
                 function group:addLabel(args)
                     groupbox.Size += UDim2.new(0, 0, 0, 20)
@@ -2557,6 +2753,14 @@ end
                     BG.BorderSizePixel = 0
                     BG.Position = UDim2.new(0.02, -1, 0, 16)
                     BG.Size = UDim2.new(0, 240, 0, 15)
+                    
+                    local listCorner = Instance.new("UICorner", BG)
+                    listCorner.CornerRadius = UDim.new(0, 4)
+                    
+                    local listGlow = Instance.new("UIStroke", BG)
+                    listGlow.Color = library.Colors.libColor
+                    listGlow.Thickness = 0.5
+                    listGlow.Transparency = 0.9
 
                     main.Name = "main"
                     main.Parent = BG
@@ -2629,6 +2833,14 @@ end
                     frame.Size = UDim2.new(0, 203, 0, 0)
                     frame.Visible = false
                     frame.ZIndex = library.multiZindex
+                    
+                    local frameCorner = Instance.new("UICorner", frame)
+                    frameCorner.CornerRadius = UDim.new(0, 4)
+                    
+                    local frameGlow = Instance.new("UIStroke", frame)
+                    frameGlow.Color = library.Colors.libColor
+                    frameGlow.Thickness = 1
+                    frameGlow.Transparency = 0.7
 
                     holder.Name = "holder"
                     holder.Parent = frame
@@ -3377,723 +3589,8 @@ end
 
                 function library:refreshConfigs()
                 local tbl = {}
-                  for i,v in next, listfiles("Unknown.client") do table.insert(tbl,v) end
+                for i,v in next, listfiles("Unknown.client") do table.insert(tbl,v) end
                 library.options["config_box"].refresh(tbl)
                 end      
-                end)() 
-                    
-local oldNotify = library.Notify
-local oldTween = library.Tween
-
-function library:Notify(Text, Time)
-Time = Time or 5
-local XSize, YSize = library:GetTextBounds(Text, Enum.Font.Code, 9)
-YSize = YSize + 8
-local NotifyOuter = library:Create('Frame', {BackgroundTransparency = 1; Position = UDim2.new(0, 100, 0, 10); Size = UDim2.new(0, 0, 0, YSize); ClipsDescendants = true; ZIndex = 100; Parent = library.NotificationArea})
-local NotifyInner = library:Create('Frame', {BackgroundColor3 = Color3.fromRGB(5, 5, 5); BorderColor3 = library.Colors.libColor; BorderSizePixel = 1; BorderMode = Enum.BorderMode.Inset; Size = UDim2.new(1, 0, 1, 0); ZIndex = 101; Parent = NotifyOuter})
-local InnerFrame = library:Create('Frame', {BackgroundColor3 = Color3.fromRGB(10, 10, 10); BorderSizePixel = 0; Position = UDim2.new(0, 1, 0, 1); Size = UDim2.new(1, -2, 1, -2); ZIndex = 102; Parent = NotifyInner})
-local Line = library:Create('Frame', {BackgroundColor3 = library.Colors.libColor; BorderSizePixel = 0; Position = UDim2.new(1, 0, 0.97, 0); Size = UDim2.new(-0.999, -0.5, 0, 1.9); ZIndex = 102; Parent = NotifyInner})
-local Glow = library:Create('Frame', {BackgroundColor3 = library.Colors.libColor; BackgroundTransparency = 0.8; BorderSizePixel = 0; Position = UDim2.new(0, -3, 0, -3); Size = UDim2.new(1, 6, 1, 6); ZIndex = 99; Parent = NotifyOuter})
-local GlowGradient = Instance.new('UIGradient')
-GlowGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0, library.Colors.libColor), ColorSequenceKeypoint.new(1, Color3.fromRGB(255,255,255))}
-GlowGradient.Rotation = 45
-GlowGradient.Parent = Glow
-library:CreateLabel({Position = UDim2.new(0, 8, 0, 0); Size = UDim2.new(1, -4, 1, 0); Text = Text; TextXAlignment = Enum.TextXAlignment.Left; TextSize = 9; TextColor3 = Color3.fromRGB(220, 220, 255); ZIndex = 103; Parent = InnerFrame})
-pcall(function() NotifyOuter:TweenSize(UDim2.new(0, XSize + 50, 0, YSize), 'Out', 'Elastic', 0.8, true) end)
-pcall(function() Glow:TweenSize(UDim2.new(1, 10, 1, 10), 'Out', 'Quad', 0.4) end)
-wait(0.9)
-pcall(function() Line:TweenSize(UDim2.new(0, 0, 0, 2), 'Out', 'Linear', Time, true) end)
-task.spawn(function()
-    wait(Time)
-    pcall(function() NotifyOuter:TweenSize(UDim2.new(0, 0, 0, YSize), 'Out', 'Quad', 0.4, true) end)
-    wait(0.4)
-    NotifyOuter:Destroy()
-end)
-end
-
-local ToggleMethods = {}
-
-function ToggleMethods:addColorpicker(args)
-if not args.flag and args.text then args.flag = args.text end
-if not args.flag then return warn("invalid args") end
-local colorpicker = Instance.new("Frame")
-local mid = Instance.new("Frame")
-local front = Instance.new("Frame")
-local button2 = Instance.new("TextButton")
-local colorFrame = Instance.new("Frame")
-local hueframe = Instance.new("Frame")
-local main = Instance.new("Frame")
-local hue = Instance.new("ImageLabel")
-local pickerframe = Instance.new("Frame")
-local main_2 = Instance.new("Frame")
-local picker = Instance.new("ImageLabel")
-local CurrentColorFrame = Instance.new("Frame")
-local CurrentColorFrame_Text = Instance.new("TextLabel")
-local Glow = Instance.new("Frame")
-local GlowGradient = Instance.new("UIGradient")
-
-colorpicker.Parent = self._toggleframe
-colorpicker.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-colorpicker.BackgroundTransparency = 1.000
-colorpicker.Size = UDim2.new(0, 20, 0, 10)
-colorpicker.Position = args.second and UDim2.new(0.720000029, 4, 0.272000015, 0) or UDim2.new(0.860000014, 4, 0.272000015, 0)
-
-mid.Name = "mid"
-mid.Parent = colorpicker
-mid.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-mid.BorderColor3 = library.Colors.libColor
-mid.BorderSizePixel = 1
-mid.Size = UDim2.new(1, 0, 1, 0)
-
-Glow.Parent = mid
-Glow.BackgroundColor3 = library.Colors.libColor
-Glow.BackgroundTransparency = 0.7
-Glow.BorderSizePixel = 0
-Glow.Position = UDim2.new(-0.5, 0, -0.5, 0)
-Glow.Size = UDim2.new(2, 0, 2, 0)
-Glow.ZIndex = 0
-GlowGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0, library.Colors.libColor), ColorSequenceKeypoint.new(1, Color3.fromRGB(255,255,255))}
-GlowGradient.Rotation = 45
-GlowGradient.Parent = Glow
-
-front.Name = "front"
-front.Parent = mid
-front.BackgroundColor3 = library.Colors.libColor
-front.BorderColor3 = Color3.fromRGB(0, 0, 0)
-front.BorderSizePixel = 0
-front.Size = UDim2.new(1, 0, 1, 0)
-
-button2.Name = "button2"
-button2.Parent = front
-button2.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-button2.BackgroundTransparency = 1.000
-button2.Size = UDim2.new(1, 0, 1, 0)
-button2.Text = ""
-
-colorFrame.Name = "colorFrame"
-colorFrame.Parent = self._toggleframe
-colorFrame.BackgroundColor3 = Color3.fromRGB(5,5,5)
-colorFrame.BorderColor3 = library.Colors.libColor
-colorFrame.BorderSizePixel = 1
-colorFrame.Position = UDim2.new(0.101092957, 0, 0.75, 0)
-colorFrame.Size = UDim2.new(0, 187, 0, 178)
-colorFrame.Visible = false
-
-local colorFrameInner = Instance.new("Frame")
-colorFrameInner.Parent = colorFrame
-colorFrameInner.BackgroundColor3 = Color3.fromRGB(10,10,10)
-colorFrameInner.BorderColor3 = Color3.fromRGB(30, 30, 30)
-colorFrameInner.Position = UDim2.new(0, 1, 0, 1)
-colorFrameInner.Size = UDim2.new(1, -2, 1, -2)
-
-hueframe.Name = "hueframe"
-hueframe.Parent = colorFrameInner
-hueframe.BackgroundColor3 = Color3.fromRGB(5,5,5)
-hueframe.BorderColor3 = library.Colors.libColor
-hueframe.BorderSizePixel = 1
-hueframe.Position = UDim2.new(-0.0830000022, 18, -0.0559999987, 13)
-hueframe.Size = UDim2.new(0.25, 110, 0.25, 110)
-
-main.Name = "main"
-main.Parent = hueframe
-main.BackgroundColor3 = Color3.fromRGB(5,5,5)
-main.BorderColor3 = Color3.fromRGB(0, 0, 0)
-main.Size = UDim2.new(1, 0, 1, 0)
-
-picker.Name = "picker"
-picker.Parent = main
-picker.BackgroundColor3 = Color3.fromRGB(232, 0, 255)
-picker.BorderColor3 = Color3.fromRGB(0, 0, 0)
-picker.BorderSizePixel = 0
-picker.Size = UDim2.new(1, 0, 1, 0)
-picker.Image = "rbxassetid://2615689005"
-
-pickerframe.Name = "pickerframe"
-pickerframe.Parent = colorFrame
-pickerframe.BackgroundColor3 = Color3.fromRGB(5,5,5)
-pickerframe.BorderColor3 = library.Colors.libColor
-pickerframe.BorderSizePixel = 1
-pickerframe.Position = UDim2.new(0.801000025, 14, -0.0559999987, 13)
-pickerframe.Size = UDim2.new(0, 20, 0.25, 110)
-
-CurrentColorFrame.Name = "CurrentColorFrame"
-CurrentColorFrame.Parent = colorFrame
-CurrentColorFrame.BackgroundColor3 = Color3.fromRGB(5,5,5)
-CurrentColorFrame.BorderColor3 = library.Colors.libColor
-CurrentColorFrame.BorderSizePixel = 1
-CurrentColorFrame.Position = UDim2.new(0.98, 0, 0.915, 0)
-CurrentColorFrame.Size = UDim2.new(-0.965, 0, 0, 12)
-
-CurrentColorFrame_Text.Name = "CurrentColorFrame_Text"
-CurrentColorFrame_Text.Parent = CurrentColorFrame
-CurrentColorFrame_Text.BackgroundColor3 = Color3.fromRGB(5,5,5)
-CurrentColorFrame_Text.BackgroundTransparency = 1.000
-CurrentColorFrame_Text.Size = UDim2.new(1, 0, 1, 0)
-CurrentColorFrame_Text.FontFace = Fonts.ProggyTiny
-CurrentColorFrame_Text.Text = args.text or args.flag
-CurrentColorFrame_Text.TextColor3 = library.Colors.libColor
-CurrentColorFrame_Text.TextSize = 9
-
-main_2.Name = "main"
-main_2.Parent = pickerframe
-main_2.BackgroundColor3 = Color3.fromRGB(5,5,5)
-main_2.BorderColor3 = Color3.fromRGB(0, 0, 0)
-main_2.Size = UDim2.new(0, 20, 1, 0)
-
-hue.Name = "hue"
-hue.Parent = main_2
-hue.BackgroundColor3 = Color3.fromRGB(255, 0, 178)
-hue.BorderColor3 = Color3.fromRGB(0, 0, 0)
-hue.BorderSizePixel = 0
-hue.Size = UDim2.new(0, 20, 1, 0)
-hue.Image = "rbxassetid://2615692420"
-
-local function updateValue(value,fakevalue)
-if typeof(value) == "table" then value = fakevalue end
-library.flags[args.flag] = value
-front.BackgroundColor3 = value
-CurrentColorFrame_Text.TextColor3 = value
-local r, g, b = value.r * 255, value.g * 255, value.b * 255
-CurrentColorFrame_Text.Text = "RGB(" .. math.floor(r) .. ", " .. math.floor(g) .. ", " .. math.floor(b) .. ")"
-Glow.BackgroundColor3 = value
-GlowGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0, value), ColorSequenceKeypoint.new(1, Color3.fromRGB(255,255,255))}
-if args.callback then args.callback(value) end
-end
-
-local white, black = Color3.new(1,1,1), Color3.new(0,0,0)
-local colors = {Color3.new(1,0,0),Color3.new(1,1,0),Color3.new(0,1,0),Color3.new(0,1,1),Color3.new(0,0,1),Color3.new(1,0,1),Color3.new(1,0,0)}
-local heartbeat = RunService.Heartbeat
-local pickerX,pickerY,hueY = 0,0,0
-local oldpercentX,oldpercentY = 0,0
-
-hue.MouseEnter:Connect(function()
-local input = hue.InputBegan:connect(function(key)
-if key.UserInputType == Enum.UserInputType.MouseButton1 then
-while heartbeat:wait() and InputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) do
-library.colorpicking = true
-local percent = (hueY-hue.AbsolutePosition.Y-36)/hue.AbsoluteSize.Y
-local num = math.max(1, math.min(7,math.floor(((percent*7+0.5)*100))/100))
-local startC = colors[math.floor(num)]
-local endC = colors[math.ceil(num)]
-local color = white:lerp(picker.BackgroundColor3, oldpercentX):lerp(black, oldpercentY)
-picker.BackgroundColor3 = startC:lerp(endC, num-math.floor(num)) or Color3.new(0, 0, 0)
-updateValue(color)
-end
-library.colorpicking = false
-end
-end)
-local leave = hue.MouseLeave:connect(function() input:disconnect() leave:disconnect() end)
-end)
-
-picker.MouseEnter:Connect(function()
-local input = picker.InputBegan:connect(function(key)
-if key.UserInputType == Enum.UserInputType.MouseButton1 then
-while heartbeat:wait() and InputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) do
-library.colorpicking = true
-local xPercent = (pickerX-picker.AbsolutePosition.X)/picker.AbsoluteSize.X
-local yPercent = (pickerY-picker.AbsolutePosition.Y-36)/picker.AbsoluteSize.Y
-local color = white:lerp(picker.BackgroundColor3, xPercent):lerp(black, yPercent)
-updateValue(color)
-oldpercentX,oldpercentY = xPercent,yPercent
-end
-library.colorpicking = false
-end
-end)
-local leave = picker.MouseLeave:connect(function() input:disconnect() leave:disconnect() end)
-end)
-
-hue.MouseMoved:connect(function(_, y) hueY = y end)
-picker.MouseMoved:connect(function(x, y) pickerX,pickerY = x,y end)
-
-button2.MouseButton1Click:Connect(function()
-colorFrame.Visible = not colorFrame.Visible
-mid.BorderColor3 = library.Colors.libColor
-end)
-
-button2.MouseEnter:Connect(function()
-library:Tween(mid, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BorderColor3 = library.Colors.libColor})
-Glow.Visible = true
-end)
-
-button2.MouseLeave:Connect(function()
-library:Tween(mid, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BorderColor3 = library.Colors.libColor})
-Glow.Visible = false
-end)
-
-table.insert(library.toInvis,colorFrame)
-library.flags[args.flag] = Color3.new(1,1,1)
-library.options[args.flag] = {type = "colorpicker",changeState = updateValue,skipflag = args.skipflag,oldargs = args}
-updateValue(args.color or Color3.fromRGB(147,112,219))
-end
-
-local oldAddToggle = nil
-for i,v in pairs(library.options) do if v.type == "toggle" then oldAddToggle = v.oldargs end break end
-
-function ToggleMethods:addKeybind(args)
-if not args.flag then return warn("invalid args") end
-local rebinding = false
-local keybind = Instance.new("Frame")
-local button = Instance.new("TextButton")
-local Glow = Instance.new("Frame")
-local GlowGradient = Instance.new("UIGradient")
-
-keybind.Parent = self._toggleframe
-keybind.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-keybind.BackgroundTransparency = 1.000
-keybind.Position = UDim2.new(0.82, 4, 0.15, 0)
-keybind.Size = UDim2.new(0, 30, 0, 13)
-
-button.Parent = keybind
-button.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-button.BorderColor3 = library.Colors.libColor
-button.BorderSizePixel = 1
-button.Size = UDim2.new(1, 0, 1, 0)
-button.FontFace = Fonts.ProggyTiny
-button.Text = ""
-button.TextColor3 = Color3.fromRGB(155, 155, 155)
-button.TextSize = 9
-
-Glow.Parent = button
-Glow.BackgroundColor3 = library.Colors.libColor
-Glow.BackgroundTransparency = 0.7
-Glow.BorderSizePixel = 0
-Glow.Position = UDim2.new(-0.3, 0, -0.3, 0)
-Glow.Size = UDim2.new(1.6, 0, 1.6, 0)
-Glow.ZIndex = 0
-Glow.Visible = false
-GlowGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0, library.Colors.libColor), ColorSequenceKeypoint.new(1, Color3.fromRGB(255,255,255))}
-GlowGradient.Rotation = 45
-GlowGradient.Parent = Glow
-
-local status = false
-
-function updateValue(val)
-if library.colorpicking then return end
-library.flags[args.flag] = val
-button.Text = keynames[val] or val.Name
-end
-
-button.MouseButton1Click:Connect(function()
-if library.colorpicking then return end
-button.Text = "--"
-button.TextColor3 = library.Colors.libColor
-rebinding = true
-local connection = InputService.InputBegan:Connect(function(input)
-if input.UserInputType == Enum.UserInputType.MouseButton1 then return end
-local key = input.KeyCode ~= Enum.KeyCode.Unknown and input.KeyCode or input.UserInputType
-if not table.find(library.blacklisted, key) then
-library.flags[args.flag] = key
-local keyName = tostring(key):split(".")[3]
-button.Text = keynames[key] or keyName
-button.TextColor3 = Color3.fromRGB(155, 155, 155)
-rebinding = false
-connection:Disconnect()
-end
-end)
-end)
-
-button.MouseEnter:Connect(function() Glow.Visible = true end)
-button.MouseLeave:Connect(function() Glow.Visible = false end)
-
-InputService.InputBegan:Connect(function(input)
-if input.UserInputType == Enum.UserInputType.MouseButton1 then return end
-if rebinding then return end
-local key = input.KeyCode ~= Enum.KeyCode.Unknown and input.KeyCode or input.UserInputType
-if key == library.flags[args.flag] and args.callback then
-status = not status
-args.callback(key, status)
-end
-end)
-
-if args.type == "hold" then
-InputService.InputEnded:Connect(function(input)
-if input.UserInputType == Enum.UserInputType.MouseButton1 then return end
-local key = input.KeyCode ~= Enum.KeyCode.Unknown and input.KeyCode or input.UserInputType
-if key == library.flags[args.flag] and args.callback then
-status = false
-args.callback(key, status)
-end
-end)
-end
-
-library.flags[args.flag] = Enum.KeyCode.Unknown
-library.options[args.flag] = {type = "keybind", changeState = updateValue, skipflag = args.skipflag, oldargs = args}
-updateValue(args.key or Enum.KeyCode.Unknown)
-end
-
-local toggleMt = { __index = ToggleMethods }
-
-local groupboxMethods = {}
-
-function groupboxMethods:addToggle(args)
-if not args.flag and args.text then args.flag = args.text end
-if not args.flag then return warn("invalid args") end
-
-self._groupbox.Size += UDim2.new(0, 0, 0, 20)
-
-local toggleframe = Instance.new("Frame")
-local tobble = Instance.new("Frame")
-local mid = Instance.new("Frame")
-local front = Instance.new("Frame")
-local text = Instance.new("TextLabel")
-local button = Instance.new("TextButton")
-local Glow = Instance.new("Frame")
-local GlowGradient = Instance.new("UIGradient")
-
-toggleframe.Name = "toggleframe"
-toggleframe.Parent = self._grouper
-toggleframe.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-toggleframe.BackgroundTransparency = 1.000
-toggleframe.Size = UDim2.new(1, 0, 0, 20)
-
-tobble.Name = "tobble"
-tobble.Parent = toggleframe
-tobble.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-tobble.BorderColor3 = library.Colors.libColor
-tobble.BorderSizePixel = 1
-tobble.Position = UDim2.new(0.0209999000, 0, 0.242000015, 0)
-tobble.Size = UDim2.new(0, 13, 0, 13)
-
-Glow.Parent = tobble
-Glow.BackgroundColor3 = library.Colors.libColor
-Glow.BackgroundTransparency = 0.7
-Glow.BorderSizePixel = 0
-Glow.Position = UDim2.new(-0.5, 0, -0.5, 0)
-Glow.Size = UDim2.new(2, 0, 2, 0)
-Glow.ZIndex = 0
-Glow.Visible = false
-GlowGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0, library.Colors.libColor), ColorSequenceKeypoint.new(1, Color3.fromRGB(255,255,255))}
-GlowGradient.Rotation = 45
-GlowGradient.Parent = Glow
-
-mid.Name = "mid"
-mid.Parent = tobble
-mid.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-mid.BorderColor3 = Color3.fromRGB(25, 25, 25)
-mid.BorderSizePixel = 0
-mid.Size = UDim2.new(1, 0, 1, 0)
-
-front.Name = "front"
-front.Parent = mid
-front.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-front.BorderColor3 = Color3.fromRGB(25, 25, 25)
-front.Size = UDim2.new(1, 0, 1, 0)
-
-text.Name = "text"
-text.Parent = toggleframe
-text.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-text.BackgroundTransparency = 1.000
-text.Position = UDim2.new(0, 27, 0, 0)
-text.Size = UDim2.new(0, 0, 1, 2)
-text.FontFace = Fonts.ProggyTiny
-text.Text = args.text or args.flag
-text.TextColor3 = Color3.fromRGB(155, 155, 155)
-text.TextSize = 9
-text.TextXAlignment = Enum.TextXAlignment.Left
-
-button.Name = "button"
-button.Parent = toggleframe
-button.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-button.BackgroundTransparency = 1.000
-button.Size = UDim2.new(0, 200, 1, 0)
-button.Text = ""
-
-local state = args.default
-if args.risky then text.TextColor3 = state and Color3.fromRGB(255, 70, 70) or Color3.fromRGB(139, 0, 0) end
-if state == true then
-front.BackgroundColor3 = library.Colors.libColor
-if args.risky then text.TextColor3 = Color3.fromRGB(255, 70, 70) else text.TextColor3 = Color3.fromRGB(244, 244, 244) end
-if args.callback then args.callback(state) end
-else
-if args.risky then text.TextColor3 = Color3.fromRGB(139, 0, 0) else text.TextColor3 = Color3.fromRGB(144, 144, 144) end
-end
-
-function toggle(newState)
-state = newState
-library.flags[args.flag] = state
-front.BackgroundColor3 = state and library.Colors.libColor or Color3.fromRGB(25, 25, 25)
-if args.risky then text.TextColor3 = state and Color3.fromRGB(255, 70, 70) or Color3.fromRGB(139, 0, 0) else text.TextColor3 = state and Color3.fromRGB(244, 244, 244) or Color3.fromRGB(144, 144, 144) end
-if args.callback then args.callback(state) end
-end
-
-button.MouseButton1Click:Connect(function()
-state = not state
-library.flags[args.flag] = state
-front.BackgroundColor3 = state and library.Colors.libColor or Color3.fromRGB(25, 25, 25)
-if args.risky then text.TextColor3 = state and Color3.fromRGB(255, 70, 70) or Color3.fromRGB(139, 0, 0) else text.TextColor3 = state and Color3.fromRGB(244, 244, 244) or Color3.fromRGB(144, 144, 144) end
-if args.callback then args.callback(state) end
-end)
-
-button.MouseEnter:Connect(function()
-library:Tween(mid, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundColor3 = library.Colors.libColor})
-Glow.Visible = true
-end)
-
-button.MouseLeave:Connect(function()
-library:Tween(mid, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(25,25,25)})
-Glow.Visible = false
-end)
-
-library.flags[args.flag] = false
-library.options[args.flag] = {text = args.text,type = "toggle",changeState = toggle,skipflag = args.skipflag,oldargs = args,toggle = state,risky = args.risky or false}
-
-local toggleObj = setmetatable({ _toggleframe = toggleframe }, toggleMt)
-return toggleObj
-end
-
-function groupboxMethods:addSlider(args)
-if not args.flag or not args.max then return warn("invalid args") end
-self._groupbox.Size += UDim2.new(0, 0, 0, 35)
-
-local slider = Instance.new("Frame")
-local BG = Instance.new("Frame")
-local main = Instance.new("Frame")
-local fill = Instance.new("Frame")
-local button = Instance.new("TextButton")
-local valuetext = Instance.new("TextLabel")
-local text = Instance.new("TextLabel")
-local Glow = Instance.new("Frame")
-local GlowGradient = Instance.new("UIGradient")
-
-slider.Name = "slider"
-slider.Parent = self._grouper
-slider.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-slider.BackgroundTransparency = 1.000
-slider.Size = UDim2.new(1, 0, 0, 35)
-
-BG.Name = "BG"
-BG.Parent = slider
-BG.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-BG.BorderColor3 = library.Colors.libColor
-BG.BorderSizePixel = 1
-BG.Position = UDim2.new(0.02, -1, 0, 15)
-BG.Size = UDim2.new(0, 240, 0, 12)
-
-Glow.Parent = BG
-Glow.BackgroundColor3 = library.Colors.libColor
-Glow.BackgroundTransparency = 0.7
-Glow.BorderSizePixel = 0
-Glow.Position = UDim2.new(-0.2, 0, -0.5, 0)
-Glow.Size = UDim2.new(1.4, 0, 2, 0)
-Glow.ZIndex = 0
-Glow.Visible = false
-GlowGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0, library.Colors.libColor), ColorSequenceKeypoint.new(1, Color3.fromRGB(255,255,255))}
-GlowGradient.Rotation = 45
-GlowGradient.Parent = Glow
-
-main.Name = "main"
-main.Parent = BG
-main.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-main.BorderColor3 = Color3.fromRGB(20, 20, 20)
-main.Size = UDim2.new(1, -2, 1, -2)
-main.Position = UDim2.new(0, 1, 0, 1)
-
-fill.Name = "fill"
-fill.Parent = main
-fill.BackgroundColor3 = library.Colors.libColor
-fill.BorderSizePixel = 0
-fill.Size = UDim2.new(args.value and (args.value/args.max) or 0, 0, 1, 0)
-
-button.Name = "button"
-button.Parent = main
-button.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-button.BackgroundTransparency = 1.000
-button.Size = UDim2.new(1, 0, 1, 0)
-button.Text = ""
-
-valuetext.Parent = main
-valuetext.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-valuetext.BackgroundTransparency = 1.000
-valuetext.Position = UDim2.new(0.5, 0, 0, 2)
-valuetext.FontFace = Fonts.ProggyTiny
-valuetext.Text = (args.value or 0) .. "/" .. args.max
-valuetext.TextColor3 = Color3.fromRGB(200, 200, 255)
-valuetext.TextSize = 8
-
-text.Name = "text"
-text.Parent = slider
-text.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-text.BackgroundTransparency = 1.000
-text.Position = UDim2.new(0.0299999993, -1, 0, 7)
-text.FontFace = Fonts.ProggyTiny
-text.Text = args.text or args.flag
-text.TextColor3 = args.risky and Color3.fromRGB(255,70,70) or Color3.fromRGB(244, 244, 244)
-text.TextSize = 9
-text.TextXAlignment = Enum.TextXAlignment.Left
-
-local dragging = false
-local function round(value, d) local s = 10^d return math.floor(value*s+0.5)/s end
-local function updateValue(value)
-if library.colorpicking then return end
-fill:TweenSize(UDim2.new(value/args.max,0,1,0),Enum.EasingDirection.In,Enum.EasingStyle.Linear,0.1)
-valuetext.Text = value .. "/" .. args.max
-library.flags[args.flag] = value
-if args.callback then args.callback(value) end
-end
-
-local function updateScroll()
-local range = args.max - (args.min or 0)
-local nx = (Mouse.X - button.AbsolutePosition.X) / button.AbsoluteSize.X
-nx = math.clamp(nx,0,1)
-local value = (args.min or 0) + nx * range
-local snap = (args.min or 0) + (args.float or 0.1) * math.floor((value - (args.min or 0)) / (args.float or 0.1) + 0.5)
-value = math.clamp(snap,args.min or 0,args.max)
-updateValue(round(value,2))
-end
-
-button.InputBegan:Connect(function(i)
-if i.UserInputType == Enum.UserInputType.MouseButton1 then
-dragging = true
-updateScroll()
-end
-end)
-
-button.InputEnded:Connect(function(i)
-if i.UserInputType == Enum.UserInputType.MouseButton1 then
-dragging = false
-end
-end)
-
-InputService.InputChanged:Connect(function(i)
-if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then
-updateScroll()
-end
-end)
-
-button.MouseEnter:Connect(function() Glow.Visible = true end)
-button.MouseLeave:Connect(function() Glow.Visible = false end)
-
-library.flags[args.flag] = args.value or args.default or 0
-library.options[args.flag] = { type = "slider", changeState = updateValue, skipflag = args.skipflag, oldargs = args }
-updateValue(args.value or args.default or 0)
-end
-
-function groupboxMethods:addButton(args)
-if not args.callback or not args.text then return warn("invalid args") end
-self._groupbox.Size += UDim2.new(0, 0, 0, 25)
-
-local buttonframe = Instance.new("Frame")
-local BG = Instance.new("Frame")
-local main = Instance.new("Frame")
-local button = Instance.new("TextButton")
-local Glow = Instance.new("Frame")
-local GlowGradient = Instance.new("UIGradient")
-
-buttonframe.Parent = self._grouper
-buttonframe.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-buttonframe.BackgroundTransparency = 1.000
-buttonframe.Size = UDim2.new(1, 0, 0, 25)
-
-BG.Parent = buttonframe
-BG.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-BG.BorderColor3 = library.Colors.libColor
-BG.BorderSizePixel = 1
-BG.Position = UDim2.new(0.02, -1, 0.1, 0)
-BG.Size = UDim2.new(0, 240, 0, 15)
-
-Glow.Parent = BG
-Glow.BackgroundColor3 = library.Colors.libColor
-Glow.BackgroundTransparency = 0.7
-Glow.BorderSizePixel = 0
-Glow.Position = UDim2.new(-0.3, 0, -0.5, 0)
-Glow.Size = UDim2.new(1.6, 0, 2, 0)
-Glow.Visible = false
-GlowGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0, library.Colors.libColor), ColorSequenceKeypoint.new(1, Color3.fromRGB(255,255,255))}
-GlowGradient.Rotation = 45
-GlowGradient.Parent = Glow
-
-main.Parent = BG
-main.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-main.BorderColor3 = Color3.fromRGB(20, 20, 20)
-main.Size = UDim2.new(1, -2, 1, -2)
-main.Position = UDim2.new(0, 1, 0, 1)
-
-button.Parent = main
-button.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-button.BackgroundTransparency = 1.000
-button.Size = UDim2.new(1, 0, 1, 0)
-button.FontFace = Fonts.ProggyTiny
-button.Text = args.text
-button.TextColor3 = Color3.fromRGB(220, 220, 255)
-button.TextSize = 9
-
-button.MouseButton1Click:Connect(function()
-if not library.colorpicking then args.callback() end
-end)
-
-button.MouseEnter:Connect(function() Glow.Visible = true end)
-button.MouseLeave:Connect(function() Glow.Visible = false end)
-end
-
-local groupboxMt = { __index = groupboxMethods }
-
-local tabMethods = {}
-
-function tabMethods:createGroup(pos, groupname)
-local groupbox = Instance.new("Frame")
-local grouper = Instance.new("Frame")
-local UIListLayout = Instance.new("UIListLayout")
-local UIPadding = Instance.new("UIPadding")
-
-newTab[pos.."N"].Text = "    " .. groupname
-newTab[pos.."N"].Visible = true
-
-groupbox.Parent = newTab[pos]
-groupbox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-groupbox.BackgroundTransparency = 1.000
-groupbox.Size = UDim2.new(0, 247, 0, 8)
-
-grouper.Parent = groupbox
-grouper.BackgroundColor3 = Color3.fromRGB(5, 5, 5)
-grouper.BorderColor3 = Color3.fromRGB(25, 25, 25)
-grouper.BorderSizePixel = 1
-grouper.Size = UDim2.new(1, 0, 1, 0)
-
-UIListLayout.Parent = grouper
-UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-
-UIPadding.Parent = grouper
-UIPadding.PaddingBottom = UDim.new(0, 4)
-UIPadding.PaddingTop = UDim.new(0, 7)
-
-local groupObj = setmetatable({ _groupbox = groupbox, _grouper = grouper }, groupboxMt)
-return groupObj
-end
-
-local tabMt = { __index = tabMethods }
-
-for i, v in pairs(library.tabs) do
-if v and not getmetatable(v) then
-setmetatable(v, tabMt)
-end
-end
-
-library.Watermark:Color(Color3.fromRGB(180, 130, 255))
-
-local cursorPulse = 0
-game:GetService("RunService").Heartbeat:Connect(function(dt)
-cursorPulse = (cursorPulse + dt * 5) % (math.pi * 2)
-local pulseIntensity = 0.7 + math.sin(cursorPulse) * 0.2
-CursorOutline.Color = library.Colors.libColor:lerp(Color3.fromRGB(255, 255, 255), pulseIntensity * 0.5)
-Cursor.Color = library.Colors.libColor:lerp(Color3.fromRGB(255, 255, 255), pulseIntensity * 0.3)
-end)
-
-for i, v in pairs(tabholder:GetChildren()) do
-if v:IsA("Frame") and v:FindFirstChild("TextLabel") then
-local tabGlow = Instance.new("Frame")
-local tabGradient = Instance.new("UIGradient")
-tabGlow.Parent = v
-tabGlow.BackgroundColor3 = library.Colors.libColor
-tabGlow.BackgroundTransparency = 0.8
-tabGlow.BorderSizePixel = 0
-tabGlow.Position = UDim2.new(-0.2, 0, -0.2, 0)
-tabGlow.Size = UDim2.new(1.4, 0, 1.4, 0)
-tabGlow.ZIndex = 0
-tabGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0, library.Colors.libColor), ColorSequenceKeypoint.new(1, Color3.fromRGB(255,255,255))}
-tabGradient.Rotation = 45
-tabGradient.Parent = tabGlow
-end
-end
-
+                end)()                         
 return library
