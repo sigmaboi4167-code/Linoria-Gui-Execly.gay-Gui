@@ -1178,7 +1178,7 @@ Name.BackgroundTransparency = 1.000
 Name.BorderColor3 = Color3.fromRGB(0, 0, 0)
 Name.BorderSizePixel = 0
 Name.Size = UDim2.new(0, 175, 0, 28)
-Name.FontFace = Fonts.ProggyTiny or Enum.Font.Code
+Name.FontFace = Fonts.ProggyTiny or Font.new("rbxasset://fonts/families/SourceSansPro.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
 Name.Text = "[<font color=\"rgb(147,112,219)\">Keybinds</font>]"
 Name.TextColor3 = Color3.fromRGB(255, 255, 255)
 Name.TextSize = 9
@@ -1277,7 +1277,7 @@ WaterMarkLabel.BackgroundTransparency = 1.000
 WaterMarkLabel.BorderColor3 = Color3.fromRGB(0, 0, 0)
 WaterMarkLabel.BorderSizePixel = 0
 WaterMarkLabel.Position = UDim2.new(0, 0, 0, 0)
-WaterMarkLabel.FontFace = Fonts.ProggyTiny or Enum.Font.Code
+WaterMarkLabel.FontFace = Fonts.ProggyTiny or Font.new("rbxasset://fonts/families/SourceSansPro.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
 WaterMarkLabel.RichText = true
 WaterMarkLabel.Text = "Build: Epstein.Ware"
 WaterMarkLabel.TextColor3 = Color3.fromRGB(152, 152, 152)
@@ -1480,7 +1480,7 @@ if IsHud then table.insert(library.HudRegistry, Data) end
 end
 
 function library:CreateLabel(Properties, IsHud)
-local _Instance = library:Create('TextLabel', {BackgroundTransparency = 1; FontFace = Fonts.ProggyTiny or Enum.Font.Code; TextColor3 = library.Colors.FontColor; TextSize = 9; TextStrokeTransparency = 0})
+local _Instance = library:Create('TextLabel', {BackgroundTransparency = 1; FontFace = Fonts.ProggyTiny or Font.new("rbxasset://fonts/families/SourceSansPro.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal); TextColor3 = library.Colors.FontColor; TextSize = 9; TextStrokeTransparency = 0})
 library:AddToRegistry(_Instance, {TextColor3 = 'FontColor'}, IsHud)
 return library:Create(_Instance, Properties)
 end
@@ -1739,7 +1739,7 @@ end
                     text.BackgroundTransparency = 1.000
                     text.Position = UDim2.new(0, 22, 0, 0)
                     text.Size = UDim2.new(0, 0, 1, 2)
-                    text.FontFace = Fonts.ProggyTiny or Enum.Font.Code
+                    text.FontFace = Fonts.ProggyTiny or Font.new("rbxasset://fonts/families/SourceSansPro.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
                     text.Text = args.text or args.flag
                     text.TextColor3 = Color3.fromRGB(155, 155, 155)
                     text.TextSize = 9
@@ -1815,7 +1815,7 @@ end
                     Name.BorderSizePixel = 1
                     Name.Position = UDim2.new(0.5, 0, -1.85, 0)
                     Name.Size = UDim2.new(1, 0, 1, 0)
-                    Name.FontFace = Fonts.ProggyTiny or Enum.Font.Code
+                    Name.FontFace = Fonts.ProggyTiny or Font.new("rbxasset://fonts/families/SourceSansPro.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
                     Name.TextColor3 = Color3.fromRGB(125, 125, 125)
                     Name.TextSize = 9
                     Name.RichText = true
@@ -2039,7 +2039,7 @@ end
                         CurrentColorFrame_Text.BackgroundTransparency = 1.000
                         CurrentColorFrame_Text.BorderSizePixel = 0
                         CurrentColorFrame_Text.Size = UDim2.new(1, 0, 1, 0)
-                        CurrentColorFrame_Text.FontFace = Fonts.ProggyTiny or Enum.Font.Code
+                        CurrentColorFrame_text.FontFace = Fonts.ProggyTiny or Font.new("rbxasset://fonts/families/SourceSansPro.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
                         CurrentColorFrame_Text.Text = args.text or args.flag
                         CurrentColorFrame_Text.TextColor3 = library.Colors.libColor
                         CurrentColorFrame_Text.TextSize = 9
@@ -2287,7 +2287,7 @@ end
                 valuetext.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
                 valuetext.BackgroundTransparency = 1.000
                 valuetext.Position = UDim2.new(0.5, 0, 0.5, 0)
-                valuetext.FontFace = Fonts.ProggyTiny or Enum.Font.Code
+                valuetext.FontFace = Fonts.ProggyTiny or Font.new("rbxasset://fonts/families/SourceSansPro.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
                 valuetext.Text = "1/10"
                 valuetext.TextColor3 = Color3.fromRGB(255, 255, 255)
                 valuetext.TextSize = 9
@@ -2299,7 +2299,7 @@ end
                 text.BackgroundTransparency = 1.000
                 text.Position = UDim2.new(0.0299999993, -1, 0, 7)
                 text.ZIndex = 2
-                text.FontFace = Fonts.ProggyTiny or Enum.Font.Code
+                text.FontFace = Fonts.ProggyTiny or Font.new("rbxasset://fonts/families/SourceSansPro.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
                 text.Text = args.text or args.flag
                 text.TextColor3 = Color3.fromRGB(244, 244, 244)
                 text.TextSize = 9
@@ -2491,7 +2491,7 @@ end
                     text.BackgroundTransparency = 1.000
                     text.Position = UDim2.new(0.0299999993, -1, 0, 7)
                     text.ZIndex = 2
-                    text.FontFace = Fonts.ProggyTiny or Enum.Font.Code
+                    text.FontFace = Fonts.ProggyTiny or Font.new("rbxasset://fonts/families/SourceSansPro.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
                     text.Text = args.text or args.flag
                     text.TextColor3 = Color3.fromRGB(244, 244, 244)
                     text.TextSize = 9
@@ -2550,7 +2550,7 @@ end
                     Text.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
                     Text.BackgroundTransparency = 1.000
                     Text.Position = UDim2.new(0.02, -1, 0, 10)
-                    Text.FontFace = Fonts.ProggyTiny or Enum.Font.Code
+                    text.FontFace = Fonts.ProggyTiny or Font.new("rbxasset://fonts/families/SourceSansPro.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
                     Text.Text = args.text
                     Text.TextColor3 = Color3.fromRGB(244, 244, 244)
                     Text.TextSize = 9
@@ -2627,7 +2627,7 @@ end
                     valuetext.BackgroundTransparency = 1.000
                     valuetext.Position = UDim2.new(0.00200000009, 2, 0, 7)
                     valuetext.ZIndex = 2
-                    valuetext.FontFace = Fonts.ProggyTiny or Enum.Font.Code
+                    valuetext.FontFace = Fonts.ProggyTiny or Font.new("rbxasset://fonts/families/SourceSansPro.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
                     valuetext.Text = ""
                     valuetext.TextColor3 = Color3.fromRGB(244, 244, 244)
                     valuetext.TextSize = 9
@@ -2645,7 +2645,7 @@ end
                     text.BackgroundTransparency = 1.000
                     text.Position = UDim2.new(0.0299999993, -1, 0, 7)
                     text.ZIndex = 2
-                    text.FontFace = Fonts.ProggyTiny or Enum.Font.Code
+                    text.FontFace = Fonts.ProggyTiny or Font.new("rbxasset://fonts/families/SourceSansPro.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
                     text.Text = args.text or args.flag
                     text.TextColor3 = Color3.fromRGB(244, 244, 244)
                     text.TextSize = 9
@@ -2942,7 +2942,7 @@ end
                             text.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
                             text.BackgroundTransparency = 1.000
                             text.Size = UDim2.new(1, 0, 0, 18)
-                            text.FontFace = Fonts.ProggyTiny or Enum.Font.Code
+                            text.FontFace = Fonts.ProggyTiny or Font.new("rbxasset://fonts/families/SourceSansPro.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
                             text.Text = v
                             text.TextColor3 = Color3.fromRGB(255, 255, 255)
                             text.TextSize = 9
@@ -3003,7 +3003,7 @@ end
                     text.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
                     text.BackgroundTransparency = 1.000
                     text.Position = UDim2.new(0.02, -1, 0, 10)
-                    text.FontFace = Fonts.ProggyTiny or Enum.Font.Code
+                    text.FontFace = Fonts.ProggyTiny or Font.new("rbxasset://fonts/families/SourceSansPro.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
                     text.Text = args.text or args.flag
                     text.TextColor3 = Color3.fromRGB(244, 244, 244)
                     text.TextSize = 9
@@ -3119,7 +3119,7 @@ end
                     CurrentColorFrame_Text.BackgroundTransparency = 1.000
                     CurrentColorFrame_Text.BorderSizePixel = 0
                     CurrentColorFrame_Text.Size = UDim2.new(1, 0, 1, 0)
-                    CurrentColorFrame_Text.FontFace = Fonts.ProggyTiny or Enum.Font.Code
+                    CurrentColorFrame_text.FontFace = Fonts.ProggyTiny or Font.new("rbxasset://fonts/families/SourceSansPro.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
                     CurrentColorFrame_Text.Text = args.text or args.flag
                     CurrentColorFrame_Text.TextColor3 = library.Colors.libColor
                     CurrentColorFrame_Text.TextSize = 9
@@ -3263,7 +3263,7 @@ end
                     text.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
                     text.BackgroundTransparency = 1.000
                     text.Position = UDim2.new(0.02, -1, 0, 10)
-                    text.FontFace = Fonts.ProggyTiny or Enum.Font.Code
+                    text.FontFace = Fonts.ProggyTiny or Font.new("rbxasset://fonts/families/SourceSansPro.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
                     text.Text = args.text or args.flag
                     text.TextColor3 = Color3.fromRGB(244, 244, 244)
                     text.TextSize = 9
