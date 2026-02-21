@@ -1,1 +1,650 @@
-hi
+repeat task.wait() until game:IsLoaded()
+
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Mouse = LocalPlayer:GetMouse()
+local CoreGui = cloneref and cloneref(game:GetService("CoreGui")) or game:GetService("CoreGui")
+
+local UI = Instance.new("ScreenGui")
+UI.Name = "EpsteinWare"
+UI.Parent = CoreGui
+UI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+UI.ResetOnSpawn = false
+
+local library = {
+    flags = {},
+    tabs = {},
+    tabbuttons = {},
+    toInvis = {},
+    options = {},
+    colors = {
+        accent = Color3.fromRGB(147, 112, 219),
+        background = Color3.fromRGB(11, 11, 11),
+        foreground = Color3.fromRGB(18, 18, 18),
+        text = Color3.fromRGB(255, 255, 255),
+        textDim = Color3.fromRGB(155, 155, 155),
+        risky = Color3.fromRGB(255, 70, 70),
+        border = Color3.fromRGB(147, 112, 219)
+    },
+    keybind = Enum.KeyCode.RightBracket,
+    dragging = false,
+    colorpicking = false
+}
+
+-- MAIN WINDOW
+local Window = Instance.new("Frame")
+Window.Name = "Window"
+Window.Parent = UI
+Window.BackgroundColor3 = library.colors.background
+Window.BorderColor3 = library.colors.border
+Window.BorderSizePixel = 1
+Window.Position = UDim2.new(0.5, -350, 0.5, -250)
+Window.Size = UDim2.new(0, 700, 0, 500)
+Window.Active = true
+Window.Draggable = true
+
+-- TITLE BAR
+local TitleBar = Instance.new("Frame")
+TitleBar.Name = "TitleBar"
+TitleBar.Parent = Window
+TitleBar.BackgroundColor3 = library.colors.background
+TitleBar.BorderColor3 = library.colors.border
+TitleBar.BorderSizePixel = 1
+TitleBar.Size = UDim2.new(1, 0, 0, 30)
+
+local Title = Instance.new("TextLabel")
+Title.Name = "Title"
+Title.Parent = TitleBar
+Title.BackgroundTransparency = 1
+Title.Size = UDim2.new(1, -10, 1, 0)
+Title.Position = UDim2.new(0, 10, 0, 0)
+Title.Font = Enum.Font.SourceSans
+Title.Text = "Epstein.Ware"
+Title.TextColor3 = library.colors.accent
+Title.TextSize = 16
+Title.TextXAlignment = Enum.TextXAlignment.Left
+
+-- TABS ON RIGHT SIDE
+local TabHolder = Instance.new("Frame")
+TabHolder.Name = "TabHolder"
+TabHolder.Parent = Window
+TabHolder.BackgroundColor3 = library.colors.foreground
+TabHolder.BorderColor3 = library.colors.border
+TabHolder.BorderSizePixel = 1
+TabHolder.Position = UDim2.new(0.8, 0, 0, 31)
+TabHolder.Size = UDim2.new(0.2, 0, 1, -62)
+
+local TabContainer = Instance.new("ScrollingFrame")
+TabContainer.Name = "TabContainer"
+TabContainer.Parent = TabHolder
+TabContainer.BackgroundTransparency = 1
+TabContainer.BorderSizePixel = 0
+TabContainer.Size = UDim2.new(1, 0, 1, 0)
+TabContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
+TabContainer.ScrollBarThickness = 2
+
+local TabLayout = Instance.new("UIListLayout")
+TabLayout.Parent = TabContainer
+TabLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+TabLayout.SortOrder = Enum.SortOrder.LayoutOrder
+TabLayout.Padding = UDim.new(0, 2)
+
+-- TAB CONTENT AREA (LEFT SIDE)
+local TabContent = Instance.new("Frame")
+TabContent.Name = "TabContent"
+TabContent.Parent = Window
+TabContent.BackgroundColor3 = library.colors.background
+TabContent.BorderColor3 = library.colors.border
+TabContent.BorderSizePixel = 1
+TabContent.Position = UDim2.new(0, 0, 0, 31)
+TabContent.Size = UDim2.new(0.8, 0, 1, -62)
+
+-- STATUS BAR AT BOTTOM
+local StatusBar = Instance.new("Frame")
+StatusBar.Name = "StatusBar"
+StatusBar.Parent = Window
+StatusBar.BackgroundColor3 = library.colors.foreground
+StatusBar.BorderColor3 = library.colors.border
+StatusBar.BorderSizePixel = 1
+StatusBar.Position = UDim2.new(0, 0, 1, -25)
+StatusBar.Size = UDim2.new(1, 0, 0, 25)
+
+local StatusText = Instance.new("TextLabel")
+StatusText.Parent = StatusBar
+StatusText.BackgroundTransparency = 1
+StatusText.Size = UDim2.new(1, 0, 1, 0)
+StatusText.Font = Enum.Font.SourceSans
+StatusText.Text = "discord.gg/Epstein.Ware"
+StatusText.TextColor3 = library.colors.accent
+StatusText.TextSize = 14
+StatusText.TextXAlignment = Enum.TextXAlignment.Center
+
+-- KEYBINDS WINDOW
+local Keybinds = Instance.new("Frame")
+Keybinds.Name = "Keybinds"
+Keybinds.Parent = UI
+Keybinds.BackgroundColor3 = library.colors.background
+Keybinds.BorderColor3 = library.colors.border
+Keybinds.BorderSizePixel = 1
+Keybinds.Position = UDim2.new(0.01, 0, 0.488, 0)
+Keybinds.Size = UDim2.new(0, 200, 0, 24)
+Keybinds.Visible = false
+Keybinds.Active = true
+Keybinds.Draggable = true
+
+local KeybindsTitle = Instance.new("TextLabel")
+KeybindsTitle.Parent = Keybinds
+KeybindsTitle.BackgroundTransparency = 1
+KeybindsTitle.Size = UDim2.new(0, 195, 0, 28)
+KeybindsTitle.Font = Enum.Font.SourceSans
+KeybindsTitle.Text = "[ Keybinds ]"
+KeybindsTitle.TextColor3 = library.colors.accent
+KeybindsTitle.TextSize = 14
+
+local KeybindList = Instance.new("ScrollingFrame")
+KeybindList.Name = "KeybindList"
+KeybindList.Parent = Keybinds
+KeybindList.BackgroundColor3 = library.colors.foreground
+KeybindList.BorderColor3 = library.colors.border
+KeybindList.BorderSizePixel = 1
+KeybindList.Position = UDim2.new(0, 0, 1, 1)
+KeybindList.Size = UDim2.new(1, 0, 0, 0)
+KeybindList.CanvasSize = UDim2.new(0, 0, 0, 0)
+KeybindList.ScrollBarThickness = 2
+KeybindList.ClipsDescendants = true
+
+local KeybindLayout = Instance.new("UIListLayout")
+KeybindLayout.Parent = KeybindList
+KeybindLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+KeybindLayout.SortOrder = Enum.SortOrder.LayoutOrder
+KeybindLayout.Padding = UDim.new(0, 2)
+
+-- MAIN LIBRARY FUNCTIONS
+function library:addTab(name)
+    local tabButton = Instance.new("TextButton")
+    tabButton.Name = name.."Button"
+    tabButton.Parent = TabContainer
+    tabButton.BackgroundColor3 = library.colors.foreground
+    tabButton.BorderColor3 = library.colors.border
+    tabButton.BorderSizePixel = 1
+    tabButton.Size = UDim2.new(0, 120, 0, 30)
+    tabButton.Font = Enum.Font.SourceSans
+    tabButton.Text = name
+    tabButton.TextColor3 = library.colors.textDim
+    tabButton.TextSize = 14
+
+    -- PURPLE HOVER EFFECT
+    tabButton.MouseEnter:Connect(function()
+        TweenService:Create(tabButton, TweenInfo.new(0.2), {TextColor3 = library.colors.accent}):Play()
+    end)
+
+    tabButton.MouseLeave:Connect(function()
+        if tabButton.TextColor3 ~= library.colors.accent then
+            TweenService:Create(tabButton, TweenInfo.new(0.2), {TextColor3 = library.colors.textDim}):Play()
+        end
+    end)
+
+    local tabPage = Instance.new("ScrollingFrame")
+    tabPage.Name = name.."Page"
+    tabPage.Parent = TabContent
+    tabPage.BackgroundTransparency = 1
+    tabPage.BorderSizePixel = 0
+    tabPage.Size = UDim2.new(1, 0, 1, 0)
+    tabPage.CanvasSize = UDim2.new(0, 0, 0, 0)
+    tabPage.ScrollBarThickness = 4
+    tabPage.Visible = false
+
+    local groups = {}
+
+    function groups:createGroup(side, title)
+        local groupBox = Instance.new("Frame")
+        groupBox.Name = title.."Group"
+        groupBox.Parent = tabPage
+        groupBox.BackgroundColor3 = library.colors.foreground
+        groupBox.BorderColor3 = library.colors.border
+        groupBox.BorderSizePixel = 1
+        groupBox.Position = side == "left" and UDim2.new(0, 5, 0, 5) or UDim2.new(0.5, 5, 0, 5)
+        groupBox.Size = UDim2.new(0.5, -10, 0, 35)
+        groupBox.ClipsDescendants = true
+
+        local groupTitle = Instance.new("TextLabel")
+        groupTitle.Parent = groupBox
+        groupTitle.BackgroundColor3 = library.colors.background
+        groupTitle.BorderColor3 = library.colors.border
+        groupTitle.BorderSizePixel = 1
+        groupTitle.Size = UDim2.new(1, 0, 0, 22)
+        groupTitle.Font = Enum.Font.SourceSans
+        groupTitle.Text = "  "..title
+        groupTitle.TextColor3 = library.colors.accent
+        groupTitle.TextSize = 13
+        groupTitle.TextXAlignment = Enum.TextXAlignment.Left
+
+        local groupContent = Instance.new("Frame")
+        groupContent.Parent = groupBox
+        groupContent.BackgroundTransparency = 1
+        groupContent.Position = UDim2.new(0, 0, 0, 23)
+        groupContent.Size = UDim2.new(1, 0, 1, -23)
+
+        local groupLayout = Instance.new("UIListLayout")
+        groupLayout.Parent = groupContent
+        groupLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+        groupLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        groupLayout.Padding = UDim.new(0, 4)
+
+        local groupMethods = {}
+
+        function groupMethods:addToggle(args)
+            local frame = Instance.new("Frame")
+            frame.Name = args.flag.."Toggle"
+            frame.Parent = groupContent
+            frame.BackgroundTransparency = 1
+            frame.Size = UDim2.new(1, -10, 0, 24)
+
+            local toggleBox = Instance.new("Frame")
+            toggleBox.Parent = frame
+            toggleBox.BackgroundColor3 = library.colors.background
+            toggleBox.BorderColor3 = library.colors.border
+            toggleBox.BorderSizePixel = 1
+            toggleBox.Position = UDim2.new(0, 5, 0.2, 0)
+            toggleBox.Size = UDim2.new(0, 16, 0, 16)
+
+            local toggleInner = Instance.new("Frame")
+            toggleInner.Parent = toggleBox
+            toggleInner.BackgroundColor3 = library.colors.accent
+            toggleInner.BorderColor3 = library.colors.border
+            toggleInner.BorderSizePixel = 1
+            toggleInner.Size = UDim2.new(1, 0, 1, 0)
+            toggleInner.BackgroundTransparency = args.default and 0 or 1
+
+            local label = Instance.new("TextLabel")
+            label.Parent = frame
+            label.BackgroundTransparency = 1
+            label.Position = UDim2.new(0, 26, 0, 2)
+            label.Size = UDim2.new(1, -30, 1, -4)
+            label.Font = Enum.Font.SourceSans
+            label.Text = args.text or args.flag
+            label.TextColor3 = args.risky and library.colors.risky or library.colors.textDim
+            label.TextSize = 13
+            label.TextXAlignment = Enum.TextXAlignment.Left
+
+            local button = Instance.new("TextButton")
+            button.Parent = frame
+            button.BackgroundTransparency = 1
+            button.Size = UDim2.new(1, 0, 1, 0)
+            button.Text = ""
+
+            local state = args.default or false
+            library.flags[args.flag] = state
+            library.options[args.flag] = {type = "toggle"}
+
+            local function updateState(newState)
+                state = newState
+                library.flags[args.flag] = state
+                toggleInner.BackgroundTransparency = state and 0 or 1
+                if args.risky then
+                    label.TextColor3 = state and library.colors.risky or library.colors.textDim
+                else
+                    label.TextColor3 = state and library.colors.text or library.colors.textDim
+                end
+                if args.callback then args.callback(state) end
+            end
+
+            button.MouseButton1Click:Connect(function()
+                if not library.colorpicking then
+                    updateState(not state)
+                end
+            end)
+
+            button.MouseEnter:Connect(function()
+                TweenService:Create(toggleBox, TweenInfo.new(0.2), {BorderColor3 = library.colors.accent}):Play()
+            end)
+
+            button.MouseLeave:Connect(function()
+                TweenService:Create(toggleBox, TweenInfo.new(0.2), {BorderColor3 = library.colors.border}):Play()
+            end)
+
+            groupBox.Size = UDim2.new(0.5, -10, 0, groupBox.Size.Y.Offset + 26)
+            tabPage.CanvasSize = UDim2.new(0, 0, 0, tabPage.CanvasSize.Y.Offset + 26)
+
+            local toggleMethods = {}
+
+            function toggleMethods:addKeybind(args)
+                local keyFrame = Instance.new("Frame")
+                keyFrame.Parent = frame
+                keyFrame.BackgroundColor3 = library.colors.background
+                keyFrame.BorderColor3 = library.colors.border
+                keyFrame.BorderSizePixel = 1
+                keyFrame.Position = UDim2.new(0.75, 0, 0.15, 0)
+                keyFrame.Size = UDim2.new(0, 45, 0, 16)
+
+                local keyButton = Instance.new("TextButton")
+                keyButton.Parent = keyFrame
+                keyButton.BackgroundTransparency = 1
+                keyButton.Size = UDim2.new(1, 0, 1, 0)
+                keyButton.Font = Enum.Font.SourceSans
+                keyButton.Text = args.key and tostring(args.key):split(".")[3] or "None"
+                keyButton.TextColor3 = library.colors.textDim
+                keyButton.TextSize = 12
+
+                library.flags[args.flag] = args.key or Enum.KeyCode.Unknown
+                library.options[args.flag] = {type = "keybind"}
+
+                -- Add to keybinds window
+                local keybindLabel = Instance.new("TextLabel")
+                keybindLabel.Parent = KeybindList
+                keybindLabel.BackgroundColor3 = library.colors.foreground
+                keybindLabel.BorderColor3 = library.colors.border
+                keybindLabel.BorderSizePixel = 1
+                keybindLabel.Size = UDim2.new(1, -4, 0, 20)
+                keybindLabel.Font = Enum.Font.SourceSans
+                keybindLabel.Text = args.text..": ["..(args.key and tostring(args.key):split(".")[3] or "None").."]"
+                keybindLabel.TextColor3 = library.colors.textDim
+                keybindLabel.TextSize = 12
+
+                KeybindList.CanvasSize = UDim2.new(0, 0, 0, KeybindLayout.AbsoluteContentSize.Y)
+
+                local rebinding = false
+
+                keyButton.MouseButton1Click:Connect(function()
+                    if library.colorpicking then return end
+                    rebinding = true
+                    keyButton.Text = "..."
+                    keyButton.TextColor3 = library.colors.accent
+
+                    local connection
+                    connection = UserInputService.InputBegan:Connect(function(input)
+                        if input.UserInputType == Enum.UserInputType.MouseButton1 then return end
+                        local key = input.KeyCode ~= Enum.KeyCode.Unknown and input.KeyCode or input.UserInputType
+                        if key ~= Enum.KeyCode.Unknown then
+                            library.flags[args.flag] = key
+                            keyButton.Text = tostring(key):split(".")[3] or "None"
+                            keyButton.TextColor3 = library.colors.textDim
+                            keybindLabel.Text = args.text..": ["..tostring(key):split(".")[3].."]"
+                            rebinding = false
+                            connection:Disconnect()
+                        end
+                    end)
+                end)
+
+                keyButton.MouseEnter:Connect(function()
+                    TweenService:Create(keyFrame, TweenInfo.new(0.2), {BorderColor3 = library.colors.accent}):Play()
+                end)
+
+                keyButton.MouseLeave:Connect(function()
+                    TweenService:Create(keyFrame, TweenInfo.new(0.2), {BorderColor3 = library.colors.border}):Play()
+                end)
+
+                return toggleMethods
+            end
+
+            return toggleMethods
+        end
+
+        function groupMethods:addSlider(args)
+            local frame = Instance.new("Frame")
+            frame.Name = args.flag.."Slider"
+            frame.Parent = groupContent
+            frame.BackgroundTransparency = 1
+            frame.Size = UDim2.new(1, -10, 0, 40)
+
+            local label = Instance.new("TextLabel")
+            label.Parent = frame
+            label.BackgroundTransparency = 1
+            label.Position = UDim2.new(0, 5, 0, 0)
+            label.Size = UDim2.new(0.7, 0, 0, 18)
+            label.Font = Enum.Font.SourceSans
+            label.Text = args.text or args.flag
+            label.TextColor3 = library.colors.textDim
+            label.TextSize = 13
+            label.TextXAlignment = Enum.TextXAlignment.Left
+
+            local valueLabel = Instance.new("TextLabel")
+            valueLabel.Parent = frame
+            valueLabel.BackgroundTransparency = 1
+            valueLabel.Position = UDim2.new(0.7, 0, 0, 0)
+            valueLabel.Size = UDim2.new(0.3, -5, 0, 18)
+            valueLabel.Font = Enum.Font.SourceSans
+            valueLabel.Text = tostring(math.floor(args.default or 0))..(args.suffix or "")
+            valueLabel.TextColor3 = library.colors.accent
+            valueLabel.TextSize = 13
+            valueLabel.TextXAlignment = Enum.TextXAlignment.Right
+
+            local sliderBg = Instance.new("Frame")
+            sliderBg.Parent = frame
+            sliderBg.BackgroundColor3 = library.colors.background
+            sliderBg.BorderColor3 = library.colors.border
+            sliderBg.BorderSizePixel = 1
+            sliderBg.Position = UDim2.new(0, 5, 0, 22)
+            sliderBg.Size = UDim2.new(1, -10, 0, 10)
+
+            local sliderFill = Instance.new("Frame")
+            sliderFill.Parent = sliderBg
+            sliderFill.BackgroundColor3 = library.colors.accent
+            sliderFill.BorderSizePixel = 0
+            sliderFill.Size = UDim2.new((args.default or 0) / args.max, 0, 1, 0)
+
+            local sliderButton = Instance.new("TextButton")
+            sliderButton.Parent = sliderBg
+            sliderButton.BackgroundTransparency = 1
+            sliderButton.Size = UDim2.new(1, 0, 1, 0)
+            sliderButton.Text = ""
+
+            local dragging = false
+            local value = args.default or 0
+            library.flags[args.flag] = value
+            library.options[args.flag] = {type = "slider"}
+
+            local function updateValue(newValue)
+                value = math.floor(math.clamp(newValue, args.min or 0, args.max))
+                sliderFill.Size = UDim2.new(value / args.max, 0, 1, 0)
+                valueLabel.Text = tostring(value)..(args.suffix or "")
+                library.flags[args.flag] = value
+                if args.callback then args.callback(value) end
+            end
+
+            sliderButton.InputBegan:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    dragging = true
+                    local pos = Mouse.X - sliderBg.AbsolutePosition.X
+                    local percent = math.clamp(pos / sliderBg.AbsoluteSize.X, 0, 1)
+                    updateValue(args.min + (args.max - args.min) * percent)
+                end
+            end)
+
+            sliderButton.InputEnded:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    dragging = false
+                end
+            end)
+
+            UserInputService.InputChanged:Connect(function(input)
+                if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+                    local pos = Mouse.X - sliderBg.AbsolutePosition.X
+                    local percent = math.clamp(pos / sliderBg.AbsoluteSize.X, 0, 1)
+                    updateValue(args.min + (args.max - args.min) * percent)
+                end
+            end)
+
+            sliderButton.MouseEnter:Connect(function()
+                TweenService:Create(sliderBg, TweenInfo.new(0.2), {BorderColor3 = library.colors.accent}):Play()
+            end)
+
+            sliderButton.MouseLeave:Connect(function()
+                TweenService:Create(sliderBg, TweenInfo.new(0.2), {BorderColor3 = library.colors.border}):Play()
+            end)
+
+            groupBox.Size = UDim2.new(0.5, -10, 0, groupBox.Size.Y.Offset + 42)
+            tabPage.CanvasSize = UDim2.new(0, 0, 0, tabPage.CanvasSize.Y.Offset + 42)
+        end
+
+        function groupMethods:addButton(args)
+            local frame = Instance.new("Frame")
+            frame.Name = "Button"
+            frame.Parent = groupContent
+            frame.BackgroundTransparency = 1
+            frame.Size = UDim2.new(1, -10, 0, 30)
+
+            local button = Instance.new("TextButton")
+            button.Parent = frame
+            button.BackgroundColor3 = library.colors.background
+            button.BorderColor3 = library.colors.border
+            button.BorderSizePixel = 1
+            button.Size = UDim2.new(1, 0, 0, 24)
+            button.Position = UDim2.new(0, 0, 0, 3)
+            button.Font = Enum.Font.SourceSans
+            button.Text = args.text
+            button.TextColor3 = library.colors.text
+            button.TextSize = 13
+
+            button.MouseButton1Click:Connect(function()
+                if not library.colorpicking then
+                    args.callback()
+                end
+            end)
+
+            button.MouseEnter:Connect(function()
+                TweenService:Create(button, TweenInfo.new(0.2), {BorderColor3 = library.colors.accent}):Play()
+            end)
+
+            button.MouseLeave:Connect(function()
+                TweenService:Create(button, TweenInfo.new(0.2), {BorderColor3 = library.colors.border}):Play()
+            end)
+
+            groupBox.Size = UDim2.new(0.5, -10, 0, groupBox.Size.Y.Offset + 32)
+            tabPage.CanvasSize = UDim2.new(0, 0, 0, tabPage.CanvasSize.Y.Offset + 32)
+        end
+
+        function groupMethods:addLabel(args)
+            local label = Instance.new("TextLabel")
+            label.Parent = groupContent
+            label.BackgroundTransparency = 1
+            label.Size = UDim2.new(1, -10, 0, 22)
+            label.Font = Enum.Font.SourceSans
+            label.Text = args.text
+            label.TextColor3 = library.colors.textDim
+            label.TextSize = 13
+
+            groupBox.Size = UDim2.new(0.5, -10, 0, groupBox.Size.Y.Offset + 24)
+            tabPage.CanvasSize = UDim2.new(0, 0, 0, tabPage.CanvasSize.Y.Offset + 24)
+        end
+
+        function groupMethods:addDivider()
+            local divider = Instance.new("Frame")
+            divider.Parent = groupContent
+            divider.BackgroundColor3 = library.colors.foreground
+            divider.BorderColor3 = library.colors.border
+            divider.BorderSizePixel = 1
+            divider.Size = UDim2.new(1, -10, 0, 1)
+
+            groupBox.Size = UDim2.new(0.5, -10, 0, groupBox.Size.Y.Offset + 5)
+            tabPage.CanvasSize = UDim2.new(0, 0, 0, tabPage.CanvasSize.Y.Offset + 5)
+        end
+
+        return groupMethods
+    end
+
+    tabButton.MouseButton1Click:Connect(function()
+        for _, btn in pairs(library.tabbuttons) do
+            btn.TextColor3 = library.colors.textDim
+            TweenService:Create(btn, TweenInfo.new(0.2), {BorderColor3 = library.colors.border}):Play()
+        end
+        for _, page in pairs(library.tabs) do
+            page.Visible = false
+        end
+        tabButton.TextColor3 = library.colors.accent
+        TweenService:Create(tabButton, TweenInfo.new(0.2), {BorderColor3 = library.colors.accent}):Play()
+        tabPage.Visible = true
+    end)
+
+    table.insert(library.tabbuttons, tabButton)
+    table.insert(library.tabs, tabPage)
+
+    if #library.tabbuttons == 1 then
+        tabButton.TextColor3 = library.colors.accent
+        tabPage.Visible = true
+    end
+
+    TabContainer.CanvasSize = UDim2.new(0, 0, 0, #library.tabbuttons * 32)
+
+    return groups
+end
+
+function library:Notify(text, time)
+    time = time or 3
+    local notif = Instance.new("Frame")
+    notif.Parent = UI
+    notif.BackgroundColor3 = library.colors.background
+    notif.BorderColor3 = library.colors.accent
+    notif.BorderSizePixel = 1
+    notif.Position = UDim2.new(1, -310, 0, 10)
+    notif.Size = UDim2.new(0, 300, 0, 0)
+    notif.ClipsDescendants = true
+    notif.ZIndex = 999
+
+    local inner = Instance.new("Frame")
+    inner.Parent = notif
+    inner.BackgroundColor3 = library.colors.foreground
+    inner.BorderColor3 = library.colors.border
+    inner.BorderSizePixel = 1
+    inner.Position = UDim2.new(0, 1, 0, 1)
+    inner.Size = UDim2.new(1, -2, 1, -2)
+
+    local label = Instance.new("TextLabel")
+    label.Parent = inner
+    label.BackgroundTransparency = 1
+    label.Size = UDim2.new(1, -10, 1, 0)
+    label.Position = UDim2.new(0, 5, 0, 5)
+    label.Font = Enum.Font.SourceSans
+    label.Text = text
+    label.TextColor3 = library.colors.text
+    label.TextSize = 14
+    label.TextWrapped = true
+
+    local line = Instance.new("Frame")
+    line.Parent = inner
+    line.BackgroundColor3 = library.colors.accent
+    line.BorderSizePixel = 0
+    line.Position = UDim2.new(0, 0, 1, -2)
+    line.Size = UDim2.new(1, 0, 0, 2)
+
+    local textSize = label.TextBounds
+    notif.Size = UDim2.new(0, 300, 0, textSize.Y + 20)
+
+    TweenService:Create(notif, TweenInfo.new(0.5), {Position = UDim2.new(1, -310, 0, 10)}):Play()
+    TweenService:Create(line, TweenInfo.new(time), {Size = UDim2.new(0, 0, 0, 2)}):Play()
+
+    task.wait(time)
+    TweenService:Create(notif, TweenInfo.new(0.5), {Position = UDim2.new(1, 10, 0, 10)}):Play()
+    task.wait(0.5)
+    notif:Destroy()
+end
+
+function library:visualize(state)
+    Keybinds.Visible = state
+    if state then
+        KeybindList.Size = UDim2.new(1, 0, 0, math.min(200, KeybindLayout.AbsoluteContentSize.Y))
+        KeybindList.CanvasSize = UDim2.new(0, 0, 0, KeybindLayout.AbsoluteContentSize.Y)
+    end
+end
+
+function library:keybind_color(color)
+    library.colors.accent = color
+    Title.TextColor3 = color
+    KeybindsTitle.TextColor3 = color
+    StatusText.TextColor3 = color
+end
+
+UserInputService.InputBegan:Connect(function(input, gpe)
+    if gpe then return end
+    if input.KeyCode == library.keybind then
+        Window.Visible = not Window.Visible
+        for _, v in pairs(library.toInvis) do
+            v.Visible = false
+        end
+    end
+end)
+
+return library
