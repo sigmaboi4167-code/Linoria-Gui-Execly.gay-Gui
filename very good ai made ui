@@ -1124,6 +1124,27 @@ end
 
 local HttpService = game:GetService("HttpService")
 local Fonts = {}
+Fonts.ProggyTiny = Enum.Font.GothamBlack
+
+-- Mobile detection and scaling
+local isMobile = false
+if InputService.TouchEnabled and not InputService.MouseEnabled then
+    isMobile = true
+end
+
+local function scaleForMobile(instance)
+    if isMobile then
+        if instance.Size then
+            local size = instance.Size
+            if typeof(size) == "UDim2" then
+                instance.Size = UDim2.new(size.X.Scale, math.floor(size.X.Offset * 0.7), size.Y.Scale, math.floor(size.Y.Offset * 0.7))
+            end
+        end
+        if instance.TextSize then
+            instance.TextSize = math.floor(instance.TextSize * 0.7)
+        end
+    end
+end
 
 function Fonts:Register_Font(Name, Weight, Style, Asset)
     -- 1. Ensure the raw font file (e.g., .ttf) exists
